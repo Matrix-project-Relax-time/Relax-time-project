@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+
 import { healthCheck } from "./api/client";
 import LoadingScreen from "./components/loading-screen";
 import WelcomeScreen from "./components/welcome-screen";

@@ -1,112 +1,234 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Switch,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import {
+  Sun,
+  Moon,
+  Smartphone,
+  Bell,
+  Volume2,
+  Vibrate,
+  Trash2,
+  Info,
+  CheckCircle2,
+} from "lucide-react-native";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+type Theme = "light" | "dark" | "system";
 
-export default function TabTwoScreen() {
+const THEME_OPTIONS: { value: Theme; label: string; icon: any }[] = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Smartphone },
+];
+
+export default function SettingsScreen() {
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [notifications, setNotifications] = useState(true);
+  const [sound, setSound] = useState(true);
+  const [vibration, setVibration] = useState(true);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerSubtitle}>Customize your experience</Text>
+      </View>
+
+      {/* Notifications */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          <Bell size={16} /> Notifications
+        </Text>
+
+        <View style={styles.row}>
+          <View style={styles.rowLeft}>
+            <View style={styles.iconContainer}>
+              <Bell size={16} />
+            </View>
+            <View>
+              <Text style={styles.rowTitle}>Push Notifications</Text>
+              <Text style={styles.rowSubtitle}>Get reminded for breaks</Text>
+            </View>
+          </View>
+          <Switch value={notifications} onValueChange={setNotifications} />
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.rowLeft}>
+            <View style={styles.iconContainer}>
+              <Volume2 size={16} />
+            </View>
+            <View>
+              <Text style={styles.rowTitle}>Sound</Text>
+              <Text style={styles.rowSubtitle}>Play notification sound</Text>
+            </View>
+          </View>
+          <Switch value={sound} onValueChange={setSound} />
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.rowLeft}>
+            <View style={styles.iconContainer}>
+              <Vibrate size={16} />
+            </View>
+            <View>
+              <Text style={styles.rowTitle}>Vibration</Text>
+              <Text style={styles.rowSubtitle}>Haptic feedback</Text>
+            </View>
+          </View>
+          <Switch value={vibration} onValueChange={setVibration} />
+        </View>
+      </View>
+
+      {/* Theme */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Appearance</Text>
+        <View style={styles.themeOptions}>
+          {THEME_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            const isSelected = theme === option.value;
+            return (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.themeOption,
+                  isSelected && styles.themeOptionSelected,
+                ]}
+                onPress={() => setTheme(option.value)}
+              >
+                <Icon
+                  width={20}
+                  height={20}
+                  color={isSelected ? "#3b82f6" : "#6b7280"}
+                />
+                <Text
+                  style={[
+                    styles.themeLabel,
+                    isSelected && { color: "#3b82f6" },
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Notification Status */}
+      <View style={styles.card}>
+        <View style={styles.statusCard}>
+          <CheckCircle2 size={20} color="#3b82f6" />
+          <View style={{ marginLeft: 10 }}>
+            <Text style={styles.rowTitle}>Notifications enabled</Text>
+            <Text style={styles.rowSubtitle}>
+              You will receive break reminders
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* About */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          <Info size={16} /> About
+        </Text>
+        <View style={styles.aboutRow}>
+          <Text style={styles.rowSubtitle}>Version</Text>
+          <Text style={styles.rowTitle}>1.0.0</Text>
+        </View>
+        <View style={styles.aboutRow}>
+          <Text style={styles.rowSubtitle}>Exercises</Text>
+          <Text style={styles.rowTitle}>12</Text>
+        </View>
+        <View style={styles.aboutRow}>
+          <Text style={styles.rowSubtitle}>Categories</Text>
+          <Text style={styles.rowTitle}>3</Text>
+        </View>
+      </View>
+
+      {/* Clear Data */}
+      <View style={styles.card}>
+        <TouchableOpacity style={styles.clearButton}>
+          <Trash2 size={16} stroke="white" />
+          <Text style={styles.clearButtonText}>Clear All Data</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: { padding: 20, paddingBottom: 50 },
+  header: { marginBottom: 20 },
+  headerTitle: { fontSize: 24, fontWeight: "bold" },
+  headerSubtitle: { fontSize: 14, color: "#6b7280" },
+  card: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  cardTitle: { fontSize: 14, fontWeight: "500", marginBottom: 10 },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
+  rowLeft: { flexDirection: "row", alignItems: "center" },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#e5e7eb",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  rowTitle: { fontSize: 14, fontWeight: "500" },
+  rowSubtitle: { fontSize: 12, color: "#6b7280" },
+  themeOptions: { flexDirection: "row", justifyContent: "space-between" },
+  themeOption: {
+    flex: 1,
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 12,
+    marginHorizontal: 5,
+    backgroundColor: "#e5e7eb",
+  },
+  themeOptionSelected: {
+    backgroundColor: "#dbeafe",
+    borderWidth: 1,
+    borderColor: "#3b82f6",
+  },
+  themeLabel: { fontSize: 12, marginTop: 5, color: "#6b7280" },
+  statusCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#dbeafe",
+    borderRadius: 12,
+  },
+  aboutRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
+  },
+  clearButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ef4444",
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  clearButtonText: { color: "white", fontWeight: "500", marginLeft: 5 },
 });

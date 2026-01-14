@@ -1,134 +1,340 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { ThemedView } from "@/components/themed-view";
-import { ThemedText } from "@/components/themed-text";
+import React, { JSX, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StyleSheet,
+  Modal,
+} from "react-native";
+import { MaterialIcons, Feather, Ionicons } from "@expo/vector-icons";
+import { mockExercises } from "@/lib/mock-data";
 
-export default function MeScreen() {
+type Category = "all" | "eye" | "stretch" | "breathing";
+
+const TABS: { value: Category; label: string; icon: JSX.Element }[] = [
+  {
+    value: "all",
+    label: "All",
+    icon: <MaterialIcons name="auto-awesome" size={16} color="#4F46E5" />,
+  },
+  {
+    value: "eye",
+    label: "Eye",
+    icon: <Feather name="eye" size={16} color="#3B82F6" />,
+  },
+  {
+    value: "stretch",
+    label: "Stretch",
+    icon: <MaterialIcons name="accessibility" size={16} color="#10B981" />,
+  },
+  {
+    value: "breathing",
+    label: "Breath",
+    icon: <Ionicons name="water-outline" size={16} color="#8B5CF6" />,
+  },
+];
+
+const categoryConfig = {
+  eye: {
+    label: "Eye Care",
+    color: "#3B82F6",
+    bg: "#DBEAFE",
+    icon: <Feather name="eye" size={20} color="#3B82F6" />,
+  },
+  stretch: {
+    label: "Stretching",
+    color: "#10B981",
+    bg: "#D1FAE5",
+    icon: <MaterialIcons name="accessibility" size={20} color="#10B981" />,
+  },
+  breathing: {
+    label: "Breathing",
+    color: "#8B5CF6",
+    bg: "#EDE9FE",
+    icon: <Ionicons name="water-outline" size={20} color="#8B5CF6" />,
+  },
+};
+
+function formatDuration(seconds: number): string {
+  return seconds >= 60
+    ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+    : `${seconds}s`;
+}
+
+export default function ExercisesScreen() {
+  const [activeTab, setActiveTab] = useState<Category>("all");
+  const [selectedExercise, setSelectedExercise] = useState<
+    (typeof mockExercises)[0] | null
+  >(null);
+
+  const filteredExercises =
+    activeTab === "all"
+      ? mockExercises
+      : mockExercises.filter((e) => e.category === activeTab);
+
+  const getRandomExercise = (category: "eye" | "stretch" | "breathing") => {
+    const exercises = mockExercises.filter((e) => e.category === category);
+    return exercises[Math.floor(Math.random() * exercises.length)];
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <ThemedView style={styles.content}>
-        <ThemedText type="title">Profile</ThemedText>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Exercises</Text>
+        <Text style={styles.subtitle}>Browse and start exercises</Text>
+      </View>
 
-        <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <ThemedText style={styles.avatarText}>👤</ThemedText>
-          </View>
-          <View style={styles.profileInfo}>
-            <ThemedText type="defaultSemiBold">User Name</ThemedText>
-            <ThemedText style={styles.profileEmail}>
-              user@example.com
-            </ThemedText>
+      {/* Category Tabs */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabs}
+      >
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.value;
+          const count =
+            tab.value === "all"
+              ? mockExercises.length
+              : mockExercises.filter((e) => e.category === tab.value).length;
+          return (
+            <TouchableOpacity
+              key={tab.value}
+              onPress={() => setActiveTab(tab.value)}
+              style={[styles.tabButton, isActive && styles.tabButtonActive]}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+              >
+                {tab.icon}
+                <Text
+                  style={[styles.tabText, isActive && { color: "#FFFFFF" }]}
+                >
+                  {tab.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.tabCount,
+                    isActive
+                      ? { color: "rgba(255,255,255,0.7)" }
+                      : { color: "#6B7280" },
+                  ]}
+                >
+                  {count}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Exercise List */}
+      <View style={{ marginVertical: 12 }}>
+        {filteredExercises.map((exercise) => {
+          const config = categoryConfig[exercise.category];
+          return (
+            <TouchableOpacity
+              key={exercise.id}
+              style={styles.card}
+              onPress={() => setSelectedExercise(exercise)}
+            >
+              <Image
+                source={
+                  exercise.image
+                    ? { uri: exercise.image }
+                    : require("../assets/placeholder.png")
+                }
+                style={styles.thumbnail}
+              />
+              <View style={styles.cardContent}>
+                <View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {config.icon}
+                    <Text style={{ fontSize: 10, color: "#6B7280" }}>
+                      {config.label}
+                    </Text>
+                  </View>
+                  <Text
+                    style={{ fontWeight: "600", fontSize: 14, marginBottom: 2 }}
+                  >
+                    {exercise.name}
+                  </Text>
+                  <Text
+                    style={{ fontSize: 12, color: "#6B7280" }}
+                    numberOfLines={1}
+                  >
+                    {exercise.description}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: 8,
+                  }}
+                >
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 2,
+                      }}
+                    >
+                      <MaterialIcons
+                        name="access-time"
+                        size={12}
+                        color="#6B7280"
+                      />
+                      <Text style={{ fontSize: 10, color: "#6B7280" }}>
+                        {formatDuration(exercise.duration)}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 10, color: "#6B7280" }}>
+                      {exercise.steps.length} steps
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.startButton}
+                    onPress={() => setSelectedExercise(exercise)}
+                  >
+                    <MaterialIcons
+                      name="play-arrow"
+                      size={12}
+                      color="#FFFFFF"
+                    />
+                    <Text
+                      style={{ fontSize: 10, color: "#FFFFFF", marginLeft: 4 }}
+                    >
+                      Start
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Quick Start */}
+      <View>
+        <Text style={styles.quickTitle}>Quick Start</Text>
+        <View style={styles.quickGrid}>
+          {(["eye", "stretch", "breathing"] as const).map((category) => {
+            const config = categoryConfig[category];
+            return (
+              <TouchableOpacity
+                key={category}
+                style={[styles.quickButton, { backgroundColor: config.bg }]}
+                onPress={() => setSelectedExercise(getRandomExercise(category))}
+              >
+                {config.icon}
+                <Text style={{ fontSize: 10, fontWeight: "500", marginTop: 4 }}>
+                  {config.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Exercise Modal */}
+      <Modal visible={!!selectedExercise} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontWeight: "bold", fontSize: 16, marginBottom: 8 }}>
+              {selectedExercise?.name}
+            </Text>
+            <Text style={{ fontSize: 12, color: "#6B7280" }}>
+              {selectedExercise?.description}
+            </Text>
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() => setSelectedExercise(null)}
+            >
+              <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Statistics
-          </ThemedText>
-          <View style={styles.statRow}>
-            <View style={styles.stat}>
-              <ThemedText style={styles.statValue}>0</ThemedText>
-              <ThemedText style={styles.statLabel}>Sessions</ThemedText>
-            </View>
-            <View style={styles.stat}>
-              <ThemedText style={styles.statValue}>0</ThemedText>
-              <ThemedText style={styles.statLabel}>Minutes</ThemedText>
-            </View>
-            <View style={styles.stat}>
-              <ThemedText style={styles.statValue}>0</ThemedText>
-              <ThemedText style={styles.statLabel}>Streak</ThemedText>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Settings
-          </ThemedText>
-          <TouchableOpacity style={styles.menuItem}>
-            <ThemedText>🔔 Notifications</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <ThemedText>🎨 Theme</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <ThemedText>ℹ️ About</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <ThemedText>🚪 Logout</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </ThemedView>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1, padding: 16, backgroundColor: "#F9FAFB" },
+  header: { marginBottom: 16 },
+  title: { fontSize: 24, fontWeight: "bold" },
+  subtitle: { fontSize: 14, color: "#6B7280" },
+  tabs: { flexDirection: "row", marginBottom: 12 },
+  tabButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "#E5E7EB",
+    marginRight: 8,
   },
-  content: {
-    padding: 20,
-    paddingTop: 40,
-  },
-  profileHeader: {
+  tabButtonActive: { backgroundColor: "#4F46E5" },
+  tabText: { fontSize: 12, color: "#374151" },
+  tabCount: { fontSize: 10 },
+  card: {
     flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-    marginBottom: 32,
-    paddingBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#e0e0e0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  avatarText: {
-    fontSize: 32,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileEmail: {
-    marginTop: 4,
-    fontSize: 13,
-    color: "#666",
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     marginBottom: 12,
+    overflow: "hidden",
   },
-  statRow: {
+  thumbnail: { width: 96, height: 96, backgroundColor: "#E5E7EB" },
+  cardContent: { flex: 1, padding: 8, justifyContent: "space-between" },
+  startButton: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 16,
-    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+    backgroundColor: "#4F46E5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 12,
   },
-  stat: {
+  quickTitle: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6B7280",
+    marginBottom: 6,
+  },
+  quickGrid: { flexDirection: "row", justifyContent: "space-between" },
+  quickButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
     alignItems: "center",
   },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#0a7ea4",
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    width: "80%",
   },
-  statLabel: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#666",
-  },
-  menuItem: {
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+  modalClose: {
+    marginTop: 16,
+    backgroundColor: "#4F46E5",
+    paddingVertical: 8,
+    borderRadius: 12,
+    alignItems: "center",
   },
 });
