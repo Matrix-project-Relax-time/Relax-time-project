@@ -1,6 +1,6 @@
-import { ThemedText } from "@/components/themed-text";
 
-import { View, StyleSheet, Image } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
+import { ThemedText } from "./themed-text";
 
 export default function HomeScreen() {
   return (

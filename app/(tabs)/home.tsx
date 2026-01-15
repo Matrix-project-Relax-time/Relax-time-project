@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { memo, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
-  Eye,
-  Wind,
-  Play,
   CheckCircle2,
-  SkipForward,
+  Eye,
   Flame,
-  Target,
-  Zap,
+  Play,
+  SkipForward,
   Speech as Stretch,
+  Target,
+  Wind,
+  Zap,
 } from "lucide-react-native";
+import { ExerciseModal } from "../../components/ExerciseModal";
+import { mockExercises, mockSettings, mockStats } from "../../lib/mock-data";
 
-import { mockExercises, mockSettings, mockStats } from "@/lib/mock-data";
-import { ExerciseModal } from "@/components/ExerciseModal";
 
 export default function HomeScreen() {
   const [showExercise, setShowExercise] = useState(false);
@@ -55,22 +55,22 @@ export default function HomeScreen() {
 
       {/* Stats Grid */}
       <View style={styles.grid}>
-        <StatCard
+        <MemoStatCard
           icon={<CheckCircle2 size={16} color="#6366f1" />}
           label="Completed"
           value={mockStats.todayCompleted}
         />
-        <StatCard
+        <MemoStatCard
           icon={<SkipForward size={16} color="#6b7280" />}
           label="Skipped"
           value={mockStats.todaySkipped}
         />
-        <StatCard
+        <MemoStatCard
           icon={<Flame size={16} color="#f97316" />}
           label="Streak"
           value={`${mockStats.streak} days`}
         />
-        <StatCard
+        <MemoStatCard
           icon={<Target size={16} color="#6366f1" />}
           label="Weekly"
           value={`${mockStats.weeklyCompleted}/${mockStats.weeklyGoal}`}
@@ -96,18 +96,18 @@ export default function HomeScreen() {
 
       <View style={styles.badgeRow}>
         {mockSettings.enabledCategories.includes("eye") && (
-          <Badge icon={<Eye size={14} color="#6366f1" />} label="Eye Care" />
+          <MemoBadge icon={<Eye size={14} color="#6366f1" />} label="Eye Care" />
         )}
 
         {mockSettings.enabledCategories.includes("stretch") && (
-          <Badge
+          <MemoBadge
             icon={<Stretch size={14} color="#6366f1" />}
             label="Stretching"
           />
         )}
 
         {mockSettings.enabledCategories.includes("breathing") && (
-          <Badge icon={<Wind size={14} color="#6366f1" />} label="Breathing" />
+          <MemoBadge icon={<Wind size={14} color="#6366f1" />} label="Breathing" />
         )}
       </View>
 
@@ -147,6 +147,8 @@ function StatCard({
   );
 }
 
+const MemoStatCard = memo(StatCard);
+
 function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <View style={styles.badge}>
@@ -155,6 +157,8 @@ function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
     </View>
   );
 }
+
+const MemoBadge = memo(Badge);
 
 /* ------------------ */
 /* Styles            */

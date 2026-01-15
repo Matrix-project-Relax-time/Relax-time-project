@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
-import { View, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { BottomNav } from "@/components/BottomNav";
+import { StyleSheet, View } from "react-native";
+import { BottomNav } from "../components/BottomNav";
 
 export default function RootLayout() {
   return (
@@ -30,6 +30,5 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingBottom: 80, // space for bottom nav
   },
 });

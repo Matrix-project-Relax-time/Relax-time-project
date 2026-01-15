@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
+import * as SecureStore from "expo-secure-store";
 import { healthCheck } from "./api/client";
+import RootLayout from "./app/_layout";
 import LoadingScreen from "./components/loading-screen";
 import WelcomeScreen from "./components/welcome-screen";
-import RootLayout from "./app/_layout";
-import * as SecureStore from "expo-secure-store";
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -52,5 +52,5 @@ export default function App() {
     return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
 
-  return <RootLayout>{null}</RootLayout>;
+  return <RootLayout />;
 }
