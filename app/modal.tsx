@@ -15,6 +15,12 @@ import {
 import { ExerciseModal } from "../components/ExerciseModal";
 import { mockExercises, mockSettings, mockStats } from "../lib/mock-data";
 
+<<<<<<< HEAD
+import { mockStats, mockSettings, mockExercises } from "@/lib/mock-data";
+import { ExerciseModal } from "@/components/ExerciseModal";
+
+=======
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
 export default function HomeScreen() {
   const [showExercise, setShowExercise] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(mockExercises[0]);
@@ -154,6 +160,8 @@ function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
     </View>
   );
 }
+
+// Enable reminders
 
 /* ------------------ */
 /* Styles            */

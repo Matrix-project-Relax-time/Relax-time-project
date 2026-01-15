@@ -144,6 +144,7 @@ export default function ExercisesScreen() {
                 source={exercise.image ? { uri: exercise.image } : undefined}
                 style={styles.thumbnail}
               />
+
               <View style={styles.cardContent}>
                 <View>
                   <View
