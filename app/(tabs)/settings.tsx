@@ -166,7 +166,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, paddingBottom: 50 },
+  container: { padding: 20, paddingBottom: 50, paddingTop: 50 },
   header: { marginBottom: 20 },
   headerTitle: { fontSize: 24, fontWeight: "bold" },
   headerSubtitle: { fontSize: 14, color: "#6b7280" },
