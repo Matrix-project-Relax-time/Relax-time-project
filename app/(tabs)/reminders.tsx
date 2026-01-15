@@ -18,7 +18,7 @@ import {
 import Slider from "@react-native-community/slider";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ReminderContext } from "@/components/reminderContext";
+import { ReminderContext } from "../../components/reminderContext";
 
 const DAYS = [
   { value: 0, label: "S" },

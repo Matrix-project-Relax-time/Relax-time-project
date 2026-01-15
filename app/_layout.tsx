@@ -1,8 +1,9 @@
 import { Stack } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { BottomNav } from "@/components/BottomNav";
-import { ReminderProvider } from "@/components/reminderContext"; // ✅ import provider
+import { ReminderProvider } from "../components/reminderContext";
+import { BottomNav } from "../components/BottomNav";
+// ✅ import provider
 
 export default function RootLayout() {
   return (
