@@ -217,7 +217,12 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#F9FAFB" },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+    paddingTop: 50,
+  },
   header: { marginBottom: 16 },
   title: { fontSize: 24, fontWeight: "bold" },
   subtitle: { fontSize: 14, color: "#6B7280" },

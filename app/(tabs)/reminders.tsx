@@ -175,7 +175,9 @@ export default function RemindersScreen() {
         <Slider
           minimumValue={15}
           maximumValue={120}
+          minimumTrackTintColor="#6465f0"
           step={5}
+          thumbTintColor="#6465f0"
           value={interval}
           onValueChange={setInterval}
         />
@@ -242,7 +244,7 @@ export default function RemindersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, paddingBottom: 50 },
+  container: { padding: 20, paddingBottom: 50, paddingTop: 50, flex: 1 },
   header: { marginBottom: 20 },
   headerTitle: { fontSize: 24, fontWeight: "bold" },
   headerSubtitle: { fontSize: 14, color: "#6b7280" },
@@ -268,7 +270,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   rowTitle: { fontSize: 14, fontWeight: "500" },
-  rowSubtitle: { fontSize: 12, color: "#6b7280" },
+  rowSubtitle: { fontSize: 12, color: "#6465f0" },
   sectionTitle: { fontSize: 14, fontWeight: "500", marginBottom: 10 },
   timeRow: { flexDirection: "row", justifyContent: "space-between" },
   timeContainer: { flex: 1, marginHorizontal: 5 },
@@ -294,7 +296,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#e5e7eb",
   },
-  dayButtonActive: { backgroundColor: "#3b82f6" },
+  dayButtonActive: { backgroundColor: "#6465f0" },
   dayText: { fontSize: 12, color: "#6b7280", fontWeight: "500" },
   dayTextActive: { color: "#fff" },
   intervalText: { fontSize: 16, fontWeight: "bold" },
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  reminderNumber: { fontSize: 24, fontWeight: "bold", color: "#3b82f6" },
+  reminderNumber: { fontSize: 24, fontWeight: "bold", color: "#6465f0" },
   categoryButton: {
     flexDirection: "row",
     alignItems: "center",

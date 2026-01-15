@@ -141,11 +141,7 @@ export default function ExercisesScreen() {
               onPress={() => setSelectedExercise(exercise)}
             >
               <Image
-                source={
-                  exercise.image
-                    ? { uri: exercise.image }
-                    : require("../assets/placeholder.png")
-                }
+                source={exercise.image ? { uri: exercise.image } : ""}
                 style={styles.thumbnail}
               />
               <View style={styles.cardContent}>
@@ -272,7 +268,12 @@ export default function ExercisesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#F9FAFB" },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+    paddingTop: 50,
+  },
   header: { marginBottom: 16 },
   title: { fontSize: 24, fontWeight: "bold" },
   subtitle: { fontSize: 14, color: "#6B7280" },

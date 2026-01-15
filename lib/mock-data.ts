@@ -2,7 +2,7 @@
 
 export interface ExerciseStep {
   text: string;
-  image: any; // require() returns a number in RN
+  image: any | undefined; // optional image
 }
 
 export interface Exercise {
@@ -11,7 +11,7 @@ export interface Exercise {
   category: "eye" | "stretch" | "breathing";
   duration: number;
   description: string;
-  image: any;
+  image: any | undefined; // optional image
   steps: ExerciseStep[];
 }
 
@@ -55,20 +55,11 @@ export const mockExercises: Exercise[] = [
     category: "eye",
     duration: 20,
     description: "Look at something 20 feet away for 20 seconds",
-    image: require("../assets/images/eye/eye-1.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Find an object 20 feet away",
-        image: require("../assets/images/eye/eye-1-step-1.jpg"),
-      },
-      {
-        text: "Focus on it for 20 seconds",
-        image: require("../assets/images/eye/eye-1-step-2.jpg"),
-      },
-      {
-        text: "Blink naturally",
-        image: require("../assets/images/eye/eye-1-step-3.jpg"),
-      },
+      { text: "Find an object 20 feet away", image: undefined },
+      { text: "Focus on it for 20 seconds", image: undefined },
+      { text: "Blink naturally", image: undefined },
     ],
   },
   {
@@ -77,20 +68,11 @@ export const mockExercises: Exercise[] = [
     category: "eye",
     duration: 30,
     description: "Gentle circular eye movements",
-    image: require("../assets/images/eye/eye-2.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Close your eyes",
-        image: require("../assets/images/eye/eye-2-step-1.jpg"),
-      },
-      {
-        text: "Roll eyes clockwise 5 times",
-        image: require("../assets/images/eye/eye-2-step-2.jpg"),
-      },
-      {
-        text: "Roll eyes counter-clockwise 5 times",
-        image: require("../assets/images/eye/eye-2-step-3.jpg"),
-      },
+      { text: "Close your eyes", image: undefined },
+      { text: "Roll eyes clockwise 5 times", image: undefined },
+      { text: "Roll eyes counter-clockwise 5 times", image: undefined },
     ],
   },
   {
@@ -99,20 +81,11 @@ export const mockExercises: Exercise[] = [
     category: "eye",
     duration: 60,
     description: "Rest your eyes in darkness",
-    image: require("../assets/images/eye/eye-3.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Rub palms together to warm them",
-        image: require("../assets/images/eye/eye-3-step-1.jpg"),
-      },
-      {
-        text: "Cup palms over closed eyes",
-        image: require("../assets/images/eye/eye-3-step-2.jpg"),
-      },
-      {
-        text: "Relax and breathe deeply",
-        image: require("../assets/images/eye/eye-3-step-3.jpg"),
-      },
+      { text: "Rub palms together to warm them", image: undefined },
+      { text: "Cup palms over closed eyes", image: undefined },
+      { text: "Relax and breathe deeply", image: undefined },
     ],
   },
   {
@@ -121,24 +94,12 @@ export const mockExercises: Exercise[] = [
     category: "eye",
     duration: 45,
     description: "Alternate between near and far focus",
-    image: require("../assets/images/eye/eye-4.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Hold thumb 10 inches away",
-        image: require("../assets/images/eye/eye-4-step-1.jpg"),
-      },
-      {
-        text: "Focus on thumb for 5 seconds",
-        image: require("../assets/images/eye/eye-4-step-2.jpg"),
-      },
-      {
-        text: "Focus on distant object for 5 seconds",
-        image: require("../assets/images/eye/eye-4-step-3.jpg"),
-      },
-      {
-        text: "Repeat 5 times",
-        image: require("../assets/images/eye/eye-4-step-4.jpg"),
-      },
+      { text: "Hold thumb 10 inches away", image: undefined },
+      { text: "Focus on thumb for 5 seconds", image: undefined },
+      { text: "Focus on distant object for 5 seconds", image: undefined },
+      { text: "Repeat 5 times", image: undefined },
     ],
   },
 
@@ -149,24 +110,12 @@ export const mockExercises: Exercise[] = [
     category: "stretch",
     duration: 45,
     description: "Gentle neck stretches to release tension",
-    image: require("../assets/images/stretch/stretch-1.jpg"),
+    image: "undefined",
     steps: [
-      {
-        text: "Drop chin to chest",
-        image: require("../assets/images/stretch/stretch-1-step-1.jpg"),
-      },
-      {
-        text: "Roll head to right shoulder",
-        image: require("../assets/images/stretch/stretch-1-step-2.jpg"),
-      },
-      {
-        text: "Roll back and to left",
-        image: require("../assets/images/stretch/stretch-1-step-3.jpg"),
-      },
-      {
-        text: "Complete 3 circles each direction",
-        image: require("../assets/images/stretch/stretch-1-step-4.jpg"),
-      },
+      { text: "Drop chin to chest", image: undefined },
+      { text: "Roll head to right shoulder", image: undefined },
+      { text: "Roll back and to left", image: undefined },
+      { text: "Complete 3 circles each direction", image: undefined },
     ],
   },
   {
@@ -175,24 +124,12 @@ export const mockExercises: Exercise[] = [
     category: "stretch",
     duration: 30,
     description: "Release shoulder tension",
-    image: require("../assets/images/stretch/stretch-2.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Raise shoulders to ears",
-        image: require("../assets/images/stretch/stretch-2-step-1.jpg"),
-      },
-      {
-        text: "Hold for 3 seconds",
-        image: require("../assets/images/stretch/stretch-2-step-2.jpg"),
-      },
-      {
-        text: "Release and relax",
-        image: require("../assets/images/stretch/stretch-2-step-3.jpg"),
-      },
-      {
-        text: "Repeat 5 times",
-        image: require("../assets/images/stretch/stretch-2-step-4.jpg"),
-      },
+      { text: "Raise shoulders to ears", image: undefined },
+      { text: "Hold for 3 seconds", image: undefined },
+      { text: "Release and relax", image: undefined },
+      { text: "Repeat 5 times", image: undefined },
     ],
   },
   {
@@ -201,20 +138,11 @@ export const mockExercises: Exercise[] = [
     category: "stretch",
     duration: 30,
     description: "Loosen up your wrists",
-    image: require("../assets/images/stretch/stretch-3.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Extend arms forward",
-        image: require("../assets/images/stretch/stretch-3-step-1.jpg"),
-      },
-      {
-        text: "Make fists",
-        image: require("../assets/images/stretch/stretch-3-step-2.jpg"),
-      },
-      {
-        text: "Rotate wrists 10 times each direction",
-        image: require("../assets/images/stretch/stretch-3-step-3.jpg"),
-      },
+      { text: "Extend arms forward", image: undefined },
+      { text: "Make fists", image: undefined },
+      { text: "Rotate wrists 10 times each direction", image: undefined },
     ],
   },
   {
@@ -223,24 +151,12 @@ export const mockExercises: Exercise[] = [
     category: "stretch",
     duration: 60,
     description: "Gentle spine rotation",
-    image: require("../assets/images/stretch/stretch-4.jpg"),
+    image: undefined,
     steps: [
-      {
-        text: "Sit up straight",
-        image: require("../assets/images/stretch/stretch-4-step-1.jpg"),
-      },
-      {
-        text: "Place right hand on left knee",
-        image: require("../assets/images/stretch/stretch-4-step-2.jpg"),
-      },
-      {
-        text: "Twist torso left, look over shoulder",
-        image: require("../assets/images/stretch/stretch-4-step-3.jpg"),
-      },
-      {
-        text: "Hold 15 seconds, switch sides",
-        image: require("../assets/images/stretch/stretch-4-step-4.jpg"),
-      },
+      { text: "Sit up straight", image: undefined },
+      { text: "Place right hand on left knee", image: undefined },
+      { text: "Twist torso left, look over shoulder", image: undefined },
+      { text: "Hold 15 seconds, switch sides", image: undefined },
     ],
   },
 
@@ -251,27 +167,27 @@ export const mockExercises: Exercise[] = [
     category: "breathing",
     duration: 60,
     description: "4-4-4-4 breathing pattern for calm",
-    image: require("../assets/images/breath/breath-1.jpg"),
+    image: undefined,
     steps: [
       {
         text: "Inhale for 4 counts",
-        image: require("../assets/images/breath/breath-1-step-1.jpg"),
+        image: "",
       },
       {
         text: "Hold for 4 counts",
-        image: require("../assets/images/breath/breath-1-step-2.jpg"),
+        image: "",
       },
       {
         text: "Exhale for 4 counts",
-        image: require("../assets/images/breath/breath-1-step-3.jpg"),
+        image: "",
       },
       {
         text: "Hold for 4 counts",
-        image: require("../assets/images/breath/breath-1-step-4.jpg"),
+        image: "",
       },
       {
         text: "Repeat 3 times",
-        image: require("../assets/images/breath/breath-1-step-5.jpg"),
+        image: "",
       },
     ],
   },
@@ -281,19 +197,19 @@ export const mockExercises: Exercise[] = [
     category: "breathing",
     duration: 45,
     description: "Calming breath for stress relief",
-    image: require("../assets/images/breath/breath-2.jpg"),
+    image: "",
     steps: [
       {
         text: "Inhale through nose for 4 counts",
-        image: require("../assets/images/breath/breath-2-step-1.jpg"),
+        image: "",
       },
       {
         text: "Hold breath for 7 counts",
-        image: require("../assets/images/breath/breath-2-step-2.jpg"),
+        image: "",
       },
       {
         text: "Exhale through mouth for 8 counts",
-        image: require("../assets/images/breath/breath-2-step-3.jpg"),
+        image: "",
       },
     ],
   },
@@ -303,23 +219,23 @@ export const mockExercises: Exercise[] = [
     category: "breathing",
     duration: 60,
     description: "Diaphragmatic breathing",
-    image: require("../assets/images/breath/breath-3.jpg"),
+    image: "",
     steps: [
       {
         text: "Place hand on belly",
-        image: require("../assets/images/breath/breath-3-step-1.jpg"),
+        image: "",
       },
       {
         text: "Inhale deeply, feel belly rise",
-        image: require("../assets/images/breath/breath-3-step-2.jpg"),
+        image: "",
       },
       {
         text: "Exhale slowly, feel belly fall",
-        image: require("../assets/images/breath/breath-3-step-3.jpg"),
+        image: "",
       },
       {
         text: "Repeat 5 times",
-        image: require("../assets/images/breath/breath-3-step-4.jpg"),
+        image: "",
       },
     ],
   },
@@ -329,19 +245,19 @@ export const mockExercises: Exercise[] = [
     category: "breathing",
     duration: 30,
     description: "Quick breathing to boost energy",
-    image: require("../assets/images/breath/breath-4.jpg"),
+    image: "",
     steps: [
       {
         text: "Take 3 quick, sharp inhales through nose",
-        image: require("../assets/images/breath/breath-4-step-1.jpg"),
+        image: "",
       },
       {
         text: "One long exhale through mouth",
-        image: require("../assets/images/breath/breath-4-step-2.jpg"),
+        image: "",
       },
       {
         text: "Repeat 5 times",
-        image: require("../assets/images/breath/breath-4-step-3.jpg"),
+        image: "",
       },
     ],
   },
