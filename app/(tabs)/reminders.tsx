@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,8 +14,11 @@ import {
   Wind,
   Volume2,
   StretchHorizontal,
-} from "lucide-react-native"; // Make sure these icons are installed for React Native
-import Slider from "@react-native-community/slider"; // RN slider
+} from "lucide-react-native";
+import Slider from "@react-native-community/slider";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ReminderContext } from "@/components/reminderContext";
 
 const DAYS = [
   { value: 0, label: "S" },
@@ -58,13 +61,21 @@ const mockSettings = {
 };
 
 export default function RemindersScreen() {
-  const [enabled, setEnabled] = useState(true);
+  const { remindersEnabled, setRemindersEnabled } = useContext(ReminderContext);
+
   const [startTime, setStartTime] = useState(mockSettings.workStartTime);
   const [endTime, setEndTime] = useState(mockSettings.workEndTime);
   const [workDays, setWorkDays] = useState(mockSettings.workDays);
   const [interval, setInterval] = useState(mockSettings.reminderInterval);
   const [categories, setCategories] = useState(mockSettings.enabledCategories);
   const [soundEnabled, setSoundEnabled] = useState(mockSettings.soundEnabled);
+
+  // Load saved remindersEnabled on mount
+  useEffect(() => {
+    AsyncStorage.getItem("remindersEnabled").then((value) => {
+      if (value !== null) setRemindersEnabled(value === "true");
+    });
+  }, []);
 
   const toggleDay = (day: number) => {
     setWorkDays(
@@ -76,9 +87,8 @@ export default function RemindersScreen() {
 
   const toggleCategory = (category: string) => {
     if (categories.includes(category)) {
-      if (categories.length > 1) {
+      if (categories.length > 1)
         setCategories(categories.filter((c) => c !== category));
-      }
     } else {
       setCategories([...categories, category]);
     }
@@ -91,6 +101,11 @@ export default function RemindersScreen() {
     parseInt(endTime.split(":")[0], 10) * 60 +
     parseInt(endTime.split(":")[1], 10);
   const reminderCount = Math.floor((endMins - startMins) / interval);
+
+  const handleToggleReminders = async (value: boolean) => {
+    setRemindersEnabled(value);
+    await AsyncStorage.setItem("remindersEnabled", JSON.stringify(value));
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -105,16 +120,19 @@ export default function RemindersScreen() {
         <View style={styles.row}>
           <View style={styles.rowLeft}>
             <View style={styles.iconContainer}>
-              <Bell width={20} height={20} />
+              <Bell size={20} />
             </View>
             <View>
               <Text style={styles.rowTitle}>Reminders</Text>
               <Text style={styles.rowSubtitle}>
-                {enabled ? "Active" : "Paused"}
+                {remindersEnabled ? "Active" : "Paused"}
               </Text>
             </View>
           </View>
-          <Switch value={enabled} onValueChange={setEnabled} />
+          <Switch
+            value={!!remindersEnabled} // coerce null/undefined to false
+            onValueChange={handleToggleReminders}
+          />
         </View>
       </View>
 
@@ -175,10 +193,10 @@ export default function RemindersScreen() {
         <Slider
           minimumValue={15}
           maximumValue={120}
-          minimumTrackTintColor="#6465f0"
           step={5}
-          thumbTintColor="#6465f0"
           value={interval}
+          minimumTrackTintColor="#6465f0"
+          thumbTintColor="#6465f0"
           onValueChange={setInterval}
         />
         <View style={styles.sliderLabels}>
@@ -208,7 +226,7 @@ export default function RemindersScreen() {
                   isActive && styles.categoryIconActive,
                 ]}
               >
-                <cat.icon width={16} height={16} />
+                <cat.icon size={16} />
               </View>
               <View style={styles.categoryText}>
                 <Text style={styles.rowTitle}>{cat.label}</Text>
@@ -229,7 +247,7 @@ export default function RemindersScreen() {
         <View style={styles.row}>
           <View style={styles.rowLeft}>
             <View style={styles.iconContainer}>
-              <Volume2 width={20} height={20} />
+              <Volume2 size={20} />
             </View>
             <View>
               <Text style={styles.rowTitle}>Sound</Text>
@@ -243,6 +261,7 @@ export default function RemindersScreen() {
   );
 }
 
+// You can keep your existing styles here
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 50, paddingTop: 50, flex: 1 },
   header: { marginBottom: 20 },
@@ -339,6 +358,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  checkboxActive: { borderColor: "#3b82f6", backgroundColor: "#3b82f6" },
+  checkboxActive: { borderColor: "#3b82f6", backgroundColor: "#6465f0" },
   checkboxCheck: { color: "#fff", fontSize: 12 },
 });

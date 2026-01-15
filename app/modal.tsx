@@ -15,6 +15,7 @@ import {
 
 import { mockStats, mockSettings, mockExercises } from "@/lib/mock-data";
 import { ExerciseModal } from "@/components/ExerciseModal";
+
 export default function HomeScreen() {
   const [showExercise, setShowExercise] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(mockExercises[0]);
@@ -154,6 +155,8 @@ function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
     </View>
   );
 }
+
+// Enable reminders
 
 /* ------------------ */
 /* Styles            */

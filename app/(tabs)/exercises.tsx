@@ -141,9 +141,10 @@ export default function ExercisesScreen() {
               onPress={() => setSelectedExercise(exercise)}
             >
               <Image
-                source={exercise.image ? { uri: exercise.image } : ""}
+                source={exercise.image ? { uri: exercise.image } : undefined}
                 style={styles.thumbnail}
               />
+
               <View style={styles.cardContent}>
                 <View>
                   <View

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 
-import { healthCheck } from "./api/client";
-import LoadingScreen from "./components/loading-screen";
-import WelcomeScreen from "./components/welcome-screen";
-import RootLayout from "./app/_layout";
+import { healthCheck } from "../api/client";
+import LoadingScreen from "../components/loading-screen";
+import WelcomeScreen from "../components/welcome-screen";
+import RootLayout from "./_layout";
 import * as SecureStore from "expo-secure-store";
+import { ReminderProvider } from "../components/reminderContext";
+
+// ✅ Import the ReminderProvider
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -52,5 +55,10 @@ export default function App() {
     return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
 
-  return <RootLayout>{null}</RootLayout>;
+  // ✅ Wrap your app in the ReminderProvider
+  return (
+    <ReminderProvider>
+      <RootLayout />
+    </ReminderProvider>
+  );
 }
