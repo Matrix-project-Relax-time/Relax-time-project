@@ -1,13 +1,13 @@
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"; // Using Expo icons
 import React, { JSX, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { MaterialIcons, Feather, Ionicons } from "@expo/vector-icons"; // Using Expo icons
-import { mockHistory } from "@/lib/mock-data";
+import { mockHistory } from "../../lib/mock-data";
 
 // Mock data (replace with your real data or API)
 

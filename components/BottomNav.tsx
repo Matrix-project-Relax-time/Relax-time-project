@@ -1,6 +1,8 @@
-import { View, Text, StyleSheet, Pressable, SafeAreaView } from "react-native";
-import { useRouter, usePathname } from "expo-router";
-import { Home, Bell, Dumbbell, Clock, Settings } from "lucide-react-native";
+import { usePathname, useRouter } from "expo-router";
+import { Bell, Clock, Dumbbell, Home, Settings } from "lucide-react-native";
+import { memo, useCallback } from "react";
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabs = [
   { href: "/home", label: "Home", icon: Home },
@@ -10,59 +12,84 @@ const tabs = [
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-export function BottomNav() {
+const TabButton = memo(
+  ({
+    tab,
+    isActive,
+    onPress,
+  }: {
+    tab: (typeof tabs)[number];
+    isActive: boolean;
+    onPress: () => void;
+  }) => {
+    const Icon = tab.icon;
+    return (
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
+      >
+        <View style={styles.iconTextWrapper}>
+          <Icon
+            size={24}
+            color={isActive ? "#6366f1" : "#6b7280"}
+            strokeWidth={isActive ? 2.5 : 2}
+          />
+          <Text style={[styles.label, isActive && styles.activeLabel]}>
+            {tab.label}
+          </Text>
+        </View>
+      </Pressable>
+    );
+  }
+);
+
+TabButton.displayName = "TabButton";
+
+export const BottomNav = memo(function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
+
+  const handleNavigation = useCallback(
+    (href: typeof tabs[number]["href"]) => {
+      router.push(href);
+    },
+    [router]
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingBottom: insets.bottom }]}>
         {tabs.map((tab) => {
-          const Icon = tab.icon;
           const isActive = pathname === tab.href;
-
           return (
-            <Pressable
+            <TabButton
               key={tab.href}
-              onPress={() => router.push(tab.href)}
-              style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
-            >
-              <View style={styles.iconTextWrapper}>
-                <Icon
-                  size={24}
-                  color={isActive ? "#6366f1" : "#6b7280"}
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
-                <Text style={[styles.label, isActive && styles.activeLabel]}>
-                  {tab.label}
-                </Text>
-              </View>
-            </Pressable>
+              tab={tab}
+              isActive={isActive}
+              onPress={() => handleNavigation(tab.href)}
+            />
           );
         })}
       </View>
     </SafeAreaView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   safeArea: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
   },
 
   container: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
-    paddingBottom: 10, // space for safe area
-    paddingTop: 30,
-    height: 50,
+    paddingTop: 10,
+    paddingHorizontal: 10,
+    minHeight: 60,
   },
 
   tab: {
