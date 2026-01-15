@@ -1,19 +1,40 @@
+<<<<<<< HEAD
 import React, { useContext, useState } from "react";
 import { ScrollView, View, Text, Pressable, StyleSheet } from "react-native";
 import {
   Zap,
   Play,
-  CheckCircle2,
-  SkipForward,
-  Flame,
-  Target,
-} from "lucide-react-native";
+=======
+import { memo, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import {
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
+  CheckCircle2,
+  Eye,
+  Flame,
+<<<<<<< HEAD
+  Target,
+=======
+  Play,
+  SkipForward,
+  Speech as Stretch,
+  Target,
+  Wind,
+  Zap,
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
+} from "lucide-react-native";
+import { ExerciseModal } from "../../components/ExerciseModal";
+import { mockExercises, mockSettings, mockStats } from "../../lib/mock-data";
+
+<<<<<<< HEAD
 import { ReminderContext } from "@/components/reminderContext";
 import { ReminderModal } from "@/components/Reminder-modal";
 import { ExerciseModal } from "@/components/ExerciseModal";
 import { mockExercises, mockStats, mockSettings } from "@/lib/mock-data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+=======
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
 
 export default function HomeScreen() {
   const {
@@ -81,6 +102,7 @@ export default function HomeScreen() {
 
   // -------------------- Render --------------------
   return (
+<<<<<<< HEAD
     <>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Header */}
@@ -90,6 +112,58 @@ export default function HomeScreen() {
             <Text style={styles.title}>Matrix</Text>
             <Zap size={18} color="#6366f1" />
           </View>
+=======
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.subtitle}>Good morning</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Matrix</Text>
+          <Zap size={18} color="#6366f1" />
+        </View>
+      </View>
+
+      {/* Timer Card */}
+      <View style={[styles.card, styles.timerCard]}>
+        <Text style={styles.mutedText}>Next break in</Text>
+        <Text style={styles.timer}>{timeToNextBreak}</Text>
+
+        <Pressable style={styles.primaryButton} onPress={handleStartExercise}>
+          <Play size={16} color="#fff" />
+          <Text style={styles.primaryButtonText}>Start Now</Text>
+        </Pressable>
+      </View>
+
+      {/* Stats Grid */}
+      <View style={styles.grid}>
+        <MemoStatCard
+          icon={<CheckCircle2 size={16} color="#6366f1" />}
+          label="Completed"
+          value={mockStats.todayCompleted}
+        />
+        <MemoStatCard
+          icon={<SkipForward size={16} color="#6b7280" />}
+          label="Skipped"
+          value={mockStats.todaySkipped}
+        />
+        <MemoStatCard
+          icon={<Flame size={16} color="#f97316" />}
+          label="Streak"
+          value={`${mockStats.streak} days`}
+        />
+        <MemoStatCard
+          icon={<Target size={16} color="#6366f1" />}
+          label="Weekly"
+          value={`${mockStats.weeklyCompleted}/${mockStats.weeklyGoal}`}
+        />
+      </View>
+
+      {/* Weekly Progress */}
+      <View style={styles.card}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.progressTitle}>Weekly Progress</Text>
+          <Text style={styles.mutedText}>{Math.round(weeklyProgress)}%</Text>
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
         </View>
 
         {/* Timer Card */}
@@ -149,6 +223,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
+<<<<<<< HEAD
         {/* Active Categories */}
         <Text style={styles.sectionLabel}>Active Categories</Text>
         <View style={styles.badgeRow}>
@@ -175,6 +250,24 @@ export default function HomeScreen() {
           onSkip={handleSkip}
         />
       )}
+=======
+      <View style={styles.badgeRow}>
+        {mockSettings.enabledCategories.includes("eye") && (
+          <MemoBadge icon={<Eye size={14} color="#6366f1" />} label="Eye Care" />
+        )}
+
+        {mockSettings.enabledCategories.includes("stretch") && (
+          <MemoBadge
+            icon={<Stretch size={14} color="#6366f1" />}
+            label="Stretching"
+          />
+        )}
+
+        {mockSettings.enabledCategories.includes("breathing") && (
+          <MemoBadge icon={<Wind size={14} color="#6366f1" />} label="Breathing" />
+        )}
+      </View>
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
 
       {/* Exercise Modal */}
       {showExercise && (
@@ -188,6 +281,50 @@ export default function HomeScreen() {
   );
 }
 
+<<<<<<< HEAD
+=======
+/* ------------------ */
+/* Reusable pieces   */
+/* ------------------ */
+
+function StatCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <View style={styles.statCard}>
+      <View style={styles.statHeader}>
+        {icon}
+        <Text style={styles.statLabel}>{label}</Text>
+      </View>
+      <Text style={styles.statValue}>{value}</Text>
+    </View>
+  );
+}
+
+const MemoStatCard = memo(StatCard);
+
+function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <View style={styles.badge}>
+      {icon}
+      <Text style={styles.badgeText}>{label}</Text>
+    </View>
+  );
+}
+
+const MemoBadge = memo(Badge);
+
+/* ------------------ */
+/* Styles            */
+/* ------------------ */
+
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329
 const styles = StyleSheet.create({
   container: { paddingHorizontal: 20, paddingTop: 48, paddingBottom: 120 },
   header: { marginBottom: 32 },

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
+<<<<<<< HEAD:app/App.tsx
 import { healthCheck } from "../api/client";
 import LoadingScreen from "../components/loading-screen";
 import WelcomeScreen from "../components/welcome-screen";
@@ -8,6 +9,13 @@ import * as SecureStore from "expo-secure-store";
 import { ReminderProvider } from "../components/reminderContext";
 
 // ✅ Import the ReminderProvider
+=======
+import * as SecureStore from "expo-secure-store";
+import { healthCheck } from "./api/client";
+import RootLayout from "./app/_layout";
+import LoadingScreen from "./components/loading-screen";
+import WelcomeScreen from "./components/welcome-screen";
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329:App.tsx
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -55,10 +63,14 @@ export default function App() {
     return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
 
+<<<<<<< HEAD:app/App.tsx
   // ✅ Wrap your app in the ReminderProvider
   return (
     <ReminderProvider>
       <RootLayout />
     </ReminderProvider>
   );
+=======
+  return <RootLayout />;
+>>>>>>> faf4731d7aceca3294445372edd46e20e0469329:App.tsx
 }

@@ -1,15 +1,15 @@
-import React, { JSX, useState } from "react";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { JSX, useState } from "react";
 import {
-  View,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  ScrollView,
-  Image,
-  StyleSheet,
-  Modal,
+  View,
 } from "react-native";
-import { MaterialIcons, Feather, Ionicons } from "@expo/vector-icons";
-import { mockExercises } from "@/lib/mock-data";
+import { mockExercises } from "../../lib/mock-data";
 
 type Category = "all" | "eye" | "stretch" | "breathing";
 
