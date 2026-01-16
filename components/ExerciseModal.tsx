@@ -116,8 +116,10 @@ export function ExerciseModal({
 
   return (
     <Modal
+      visible={true}
       animationType="slide"
       presentationStyle="fullScreen"
+      statusBarTranslucent
       onRequestClose={onClose}
     >
       <View style={styles.container}>
@@ -374,8 +376,8 @@ const styles = StyleSheet.create({
   },
 
   circleBtn: {
-    height: 48,
-    width: 48,
+    height: 55,
+    width: 55,
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#e5e7eb",
@@ -384,8 +386,8 @@ const styles = StyleSheet.create({
   },
 
   playBtn: {
-    height: 64,
-    width: 64,
+    height: 55,
+    width: 55,
     borderRadius: 32,
     backgroundColor: "#6366f1",
   },
