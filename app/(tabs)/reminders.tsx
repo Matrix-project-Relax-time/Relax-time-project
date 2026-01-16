@@ -1,21 +1,21 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import Slider from "@react-native-community/slider";
 import {
   Bell,
   Eye,
-  Wind,
-  Volume2,
   StretchHorizontal,
+  Volume2,
+  Wind,
 } from "lucide-react-native";
-import Slider from "@react-native-community/slider";
+import { useContext, useEffect, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ReminderContext } from "../../components/reminderContext";
@@ -310,6 +310,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
     borderRadius: 12,
     padding: 15,
+    paddingTop: 10,
+    marginTop: -19,
     marginBottom: 15,
   },
   row: {
@@ -329,10 +331,20 @@ const styles = StyleSheet.create({
   },
   rowTitle: { fontSize: 14, fontWeight: "500" },
   rowSubtitle: { fontSize: 12, color: "#6465f0" },
-  sectionTitle: { fontSize: 14, fontWeight: "500", marginBottom: 10 },
-  timeRow: { flexDirection: "row", justifyContent: "space-between" },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 10,
+    marginTop: -7,
+    paddingTop: 0,
+  },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: -8,
+  },
   timeContainer: { flex: 1, marginHorizontal: 5 },
-  timeLabel: { fontSize: 12, color: "#6b7280", marginBottom: 4 },
+  timeLabel: { fontSize: 12, color: "#6b7280", marginBottom: 4, marginTop: 4 },
   timeInput: {
     borderWidth: 1,
     borderColor: "#d1d5db",
@@ -352,7 +364,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#fff",
   },
   dayButtonActive: { backgroundColor: "#6465f0" },
   dayText: { fontSize: 12, color: "#6b7280", fontWeight: "500" },
@@ -361,7 +373,7 @@ const styles = StyleSheet.create({
   sliderLabels: { flexDirection: "row", justifyContent: "space-between" },
   sliderLabel: { fontSize: 12, color: "#6b7280" },
   reminderCount: {
-    backgroundColor: "#e0f2fe",
+    backgroundColor: "#fff",
     padding: 10,
     borderRadius: 12,
     alignItems: "center",
@@ -374,7 +386,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 12,
     marginBottom: 5,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#fff",
   },
   categoryActive: { backgroundColor: "#dbeafe" },
   categoryIcon: {

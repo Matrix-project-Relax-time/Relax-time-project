@@ -7,36 +7,44 @@ import {
   Play,
   SkipForward,
   Target,
-  Zap
+  Zap,
 } from "lucide-react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ExerciseModal } from "../../components/ExerciseModal";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { mockExercises, mockSettings, mockStats } from "../../lib/mock-data";
- 
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DraggableModal } from "../../components/DragableModal";
+import { ExerciseModal } from "../../components/ExerciseModal";
 import { ReminderModal } from "../../components/Reminder-modal";
 import { ReminderContext } from "../../components/reminderContext";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,      // alert гаргах
-    shouldPlaySound: true,      // дуу тоглуулах
-    shouldSetBadge: false,      // badge update хийхгүй
-    shouldShowBanner: true,     // banner харагдах
-    shouldShowList: true,       // notification list-д харагдах
+    shouldShowAlert: true, // alert гаргах
+    shouldPlaySound: true, // дуу тоглуулах
+    shouldSetBadge: false, // badge update хийхгүй
+    shouldShowBanner: true, // banner харагдах
+    shouldShowList: true, // notification list-д харагдах
   }),
 });
-Notifications.addNotificationReceivedListener(notification => {
+Notifications.addNotificationReceivedListener((notification) => {
   console.log("Notification received in foreground:", notification);
 });
- 
+
 // -------------------- Notification function --------------------
 export async function sendTestNotification(seconds: number = 10) {
   if (!Device.isDevice) {
     Alert.alert("Push notification зөвхөн real device дээр ажиллана");
     return;
   }
- 
+
   // Permissions шалгах
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -44,22 +52,22 @@ export async function sendTestNotification(seconds: number = 10) {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
- 
+
   if (finalStatus !== "granted") {
     Alert.alert("Notification permission татгалзагдлаа");
     return;
   }
- 
+
   // Token авах
   const token = (await Notifications.getExpoPushTokenAsync()).data;
   console.log("Expo Push Token:", token);
- 
+
   // Notification schedule хийх
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "Сайн байна уу 👋",
       body: `${seconds} секундийн дараа notification`,
-      sound: 'default',
+      sound: "default",
     },
     trigger: {
       type: "timeInterval",
@@ -67,12 +75,10 @@ export async function sendTestNotification(seconds: number = 10) {
       repeats: false,
     } as Notifications.TimeIntervalTriggerInput,
   });
- 
+
   console.log(`Notification scheduled in ${seconds} seconds`);
- 
 }
- 
- 
+
 export default function HomeScreen() {
   const {
     reminderModalVisible,
@@ -80,61 +86,56 @@ export default function HomeScreen() {
     remindersEnabled,
     setRemindersEnabled,
   } = useContext(ReminderContext);
- 
+
   const [showExercise, setShowExercise] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(mockExercises[0]);
   const [timeToNextBreak, setTimeToNextBreak] = useState("--:--");
   const [settings, setSettings] = useState(mockSettings);
-    useEffect(() => {
+  useEffect(() => {
     if (remindersEnabled) {
       sendTestNotification(10);
     }
   }, [remindersEnabled]);
- 
+
   // Notification-д сонсох listener (foreground-д alert)
   useEffect(() => {
     const subscription = Notifications.addNotificationReceivedListener(
-      notification => {
+      (notification) => {
         console.log("Notification received:", notification);
       }
     );
     return () => subscription.remove();
   }, []);
- 
- 
+
   // Load settings when screen focuses
   useFocusEffect(
- 
- 
     useCallback(() => {
       AsyncStorage.getItem("reminderSettings").then((value) => {
         if (value) {
           setSettings({ ...mockSettings, ...JSON.parse(value) });
         }
       });
-  
     }, [])
   );
-  
+
   // Timer Logic
   useEffect(() => {
     if (!remindersEnabled) {
       setTimeToNextBreak("Paused");
       return;
     }
-   
- 
+
     const updateTimer = () => {
       const now = new Date();
       const [startH, startM] = settings.workStartTime.split(":").map(Number);
       const [endH, endM] = settings.workEndTime.split(":").map(Number);
- 
+
       const start = new Date();
       start.setHours(startH, startM, 0, 0);
- 
+
       const end = new Date();
       end.setHours(endH, endM, 0, 0);
- 
+
       if (now < start) {
         const diff = start.getTime() - now.getTime();
         const h = Math.floor(diff / 3600000);
@@ -147,18 +148,18 @@ export default function HomeScreen() {
         );
         return;
       }
- 
+
       if (now > end) {
         setTimeToNextBreak("Done");
         return;
       }
- 
+
       const elapsedMs = now.getTime() - start.getTime();
       const intervalMs = settings.reminderInterval * 60 * 1000;
       const msUntilNext = intervalMs - (elapsedMs % intervalMs);
       const m = Math.floor(msUntilNext / 60000);
       const s = Math.floor((msUntilNext % 60000) / 1000);
- 
+
       if (m >= 60) {
         const h = Math.floor(m / 60);
         setTimeToNextBreak(
@@ -172,34 +173,34 @@ export default function HomeScreen() {
         );
       }
     };
- 
+
     updateTimer();
     const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
   }, [remindersEnabled, settings]);
- 
+
   // -------------------- Handlers --------------------
   const handleEnable = async () => {
     await AsyncStorage.setItem("remindersEnabled", "true");
     setRemindersEnabled(true);
     setReminderModalVisible(false);
   };
- 
+
   const handleSkip = async () => {
     await AsyncStorage.setItem("remindersEnabled", "false");
     setRemindersEnabled(false);
     setReminderModalVisible(false);
   };
- 
+
   const handleStartExercise = () => {
     const randomIndex = Math.floor(Math.random() * mockExercises.length);
     setSelectedExercise(mockExercises[randomIndex]);
     setShowExercise(true);
   };
- 
+
   const weeklyProgress =
     (mockStats.weeklyCompleted / mockStats.weeklyGoal) * 100;
- 
+
   // -------------------- Reusable Components --------------------
   function StatCard({
     icon,
@@ -220,7 +221,7 @@ export default function HomeScreen() {
       </View>
     );
   }
- 
+
   function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
     return (
       <View style={styles.badge}>
@@ -229,7 +230,7 @@ export default function HomeScreen() {
       </View>
     );
   }
- 
+
   // -------------------- Render --------------------
   return (
     <>
@@ -242,13 +243,13 @@ export default function HomeScreen() {
             <Zap size={18} color="#6366f1" />
           </View>
         </View>
- 
+
         {/* Timer Card */}
         {remindersEnabled ? (
           <View style={[styles.card, styles.timerCard]}>
             <Text style={styles.mutedText}>Next break in</Text>
             <Text style={styles.timer}>{timeToNextBreak}</Text>
- 
+
             <Pressable
               style={styles.primaryButton}
               onPress={handleStartExercise}
@@ -262,7 +263,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionLabel}>Reminders are disabled.</Text>
           </View>
         )}
- 
+
         {/* Stats Grid */}
         <View style={styles.grid}>
           <StatCard
@@ -271,7 +272,7 @@ export default function HomeScreen() {
             value={mockStats.todayCompleted}
           />
           <StatCard
-            icon={<SkipForward size={16} color="#6b7280" />}
+            icon={<SkipForward size={16} color="#6366f1" />}
             label="Skipped"
             value={mockStats.todaySkipped}
           />
@@ -286,7 +287,7 @@ export default function HomeScreen() {
             value={`${mockStats.weeklyCompleted}/${mockStats.weeklyGoal}`}
           />
         </View>
- 
+
         {/* Weekly Progress */}
         <View style={styles.card}>
           <View style={styles.progressHeader}>
@@ -299,7 +300,7 @@ export default function HomeScreen() {
             />
           </View>
         </View>
- 
+
         {/* Active Categories */}
         <Text style={styles.sectionLabel}>Active Categories</Text>
         <View style={styles.badgeRow}>
@@ -317,7 +318,7 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
- 
+
       {/* Reminder Modal */}
       {reminderModalVisible && (
         <ReminderModal
@@ -326,19 +327,24 @@ export default function HomeScreen() {
           onSkip={handleSkip}
         />
       )}
- 
+
       {/* Exercise Modal */}
       {showExercise && (
-        <ExerciseModal
-          exercise={selectedExercise}
-          onComplete={() => setShowExercise(false)}
-          onClose={() => setShowExercise(false)}
-        />
+        <DraggableModal
+          visible={showExercise}
+          onclose={() => setShowExercise(false)}
+        >
+          <ExerciseModal
+            exercise={selectedExercise}
+            onComplete={() => setShowExercise(false)}
+            onClose={() => setShowExercise(false)}
+          />
+        </DraggableModal>
       )}
     </>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: { paddingHorizontal: 20, paddingTop: 48, paddingBottom: 120 },
   header: { marginBottom: 32 },

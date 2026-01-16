@@ -1,23 +1,16 @@
-import React, { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-import {
-  Sun,
+  Bell,
+  CheckCircle2,
+  Info,
   Moon,
   Smartphone,
-  Bell,
-  Volume2,
-  Vibrate,
+  Sun,
   Trash2,
-  Info,
-  CheckCircle2,
+  Vibrate,
+  Volume2,
 } from "lucide-react-native";
+import { useState } from "react";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
 type Theme = "light" | "dark" | "system";
 
@@ -34,7 +27,7 @@ export default function SettingsScreen() {
   const [vibration, setVibration] = useState(true);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Settings</Text>
@@ -43,9 +36,10 @@ export default function SettingsScreen() {
 
       {/* Notifications */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          <Bell size={16} /> Notifications
-        </Text>
+        <View style={styles.cardTitle}>
+          <Bell size={16} />
+          <Text style={styles.notifications}>Notifications</Text>
+        </View>
 
         <View style={styles.row}>
           <View style={styles.rowLeft}>
@@ -161,7 +155,7 @@ export default function SettingsScreen() {
           <Text style={styles.clearButtonText}>Clear All Data</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -176,7 +170,19 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
   },
-  cardTitle: { fontSize: 14, fontWeight: "500", marginBottom: 10 },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 10,
+    flex: 1,
+    flexDirection: "row",
+    alignContent: "center",
+    textAlign: "center",
+    padding: 0,
+
+    marginTop: 0,
+  },
+  notifications: { marginLeft: 4, marginTop: 10 },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
