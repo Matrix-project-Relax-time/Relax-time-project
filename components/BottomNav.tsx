@@ -1,7 +1,7 @@
 import { usePathname, useRouter } from "expo-router";
 import { Bell, Clock, Dumbbell, Home, Settings } from "lucide-react-native";
-import { memo, useCallback } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { memo } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabs = [
@@ -24,20 +24,15 @@ const TabButton = memo(
   }) => {
     const Icon = tab.icon;
     return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
-      >
-        <View style={styles.iconTextWrapper}>
-          <Icon
-            size={24}
-            color={isActive ? "#6366f1" : "#6b7280"}
-            strokeWidth={isActive ? 2.5 : 2}
-          />
-          <Text style={[styles.label, isActive && styles.activeLabel]}>
-            {tab.label}
-          </Text>
-        </View>
+      <Pressable onPress={onPress} style={styles.tab}>
+        <Icon
+          size={22}
+          color={isActive ? "#6366f1" : "#6b7280"}
+          strokeWidth={isActive ? 2.5 : 2}
+        />
+        <Text style={[styles.label, isActive && styles.activeLabel]}>
+          {tab.label}
+        </Text>
       </Pressable>
     );
   }
@@ -50,68 +45,45 @@ export const BottomNav = memo(function BottomNav() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
 
-  const handleNavigation = useCallback(
-    (href: typeof tabs[number]["href"]) => {
-      router.push(href);
-    },
-    [router]
-  );
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-        {tabs.map((tab) => {
-          const isActive = pathname === tab.href;
-          return (
-            <TabButton
-              key={tab.href}
-              tab={tab}
-              isActive={isActive}
-              onPress={() => handleNavigation(tab.href)}
-            />
-          );
-        })}
-      </View>
-    </SafeAreaView>
+    <View
+      style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}
+    >
+      {tabs.map((tab) => (
+        <TabButton
+          key={tab.href}
+          tab={tab}
+          isActive={pathname === tab.href}
+          onPress={() => router.push(tab.href)}
+        />
+      ))}
+    </View>
   );
 });
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
-  },
-
   container: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingTop: 10,
-    paddingHorizontal: 10,
-    minHeight: 60,
+    height: 80,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
   },
 
   tab: {
     alignItems: "center",
     justifyContent: "center",
     minWidth: 56,
-  },
-
-  iconTextWrapper: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  pressed: {
-    opacity: 0.6,
+    marginTop: 30,
   },
 
   label: {
     fontSize: 10,
-    fontWeight: "500" as const,
-    color: "#6b7280",
     marginTop: 2,
+    color: "#6b7280",
+    fontWeight: "500",
   },
 
   activeLabel: {

@@ -69,13 +69,52 @@ export default function RemindersScreen() {
   const [interval, setInterval] = useState(mockSettings.reminderInterval);
   const [categories, setCategories] = useState(mockSettings.enabledCategories);
   const [soundEnabled, setSoundEnabled] = useState(mockSettings.soundEnabled);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load saved remindersEnabled on mount
+  // Load saved settings on mount
   useEffect(() => {
-    AsyncStorage.getItem("remindersEnabled").then((value) => {
-      if (value !== null) setRemindersEnabled(value === "true");
-    });
+    const loadSettings = async () => {
+      const enabledVal = await AsyncStorage.getItem("remindersEnabled");
+      if (enabledVal !== null) setRemindersEnabled(enabledVal === "true");
+
+      const settingsVal = await AsyncStorage.getItem("reminderSettings");
+      if (settingsVal) {
+        const parsed = JSON.parse(settingsVal);
+        setStartTime(parsed.workStartTime ?? mockSettings.workStartTime);
+        setEndTime(parsed.workEndTime ?? mockSettings.workEndTime);
+        setWorkDays(parsed.workDays ?? mockSettings.workDays);
+        setInterval(parsed.reminderInterval ?? mockSettings.reminderInterval);
+        setCategories(
+          parsed.enabledCategories ?? mockSettings.enabledCategories
+        );
+        setSoundEnabled(parsed.soundEnabled ?? mockSettings.soundEnabled);
+      }
+      setIsLoaded(true);
+    };
+    loadSettings();
   }, []);
+
+  // Save settings on change
+  useEffect(() => {
+    if (!isLoaded) return;
+    const settings = {
+      workStartTime: startTime,
+      workEndTime: endTime,
+      workDays,
+      reminderInterval: interval,
+      enabledCategories: categories,
+      soundEnabled,
+    };
+    AsyncStorage.setItem("reminderSettings", JSON.stringify(settings));
+  }, [
+    startTime,
+    endTime,
+    workDays,
+    interval,
+    categories,
+    soundEnabled,
+    isLoaded,
+  ]);
 
   const toggleDay = (day: number) => {
     setWorkDays(

@@ -1,5 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ScrollView, View, Text, Pressable, StyleSheet } from "react-native";
+import { useFocusEffect } from "expo-router";
 import {
   Zap,
   Play,
@@ -26,6 +27,80 @@ export default function HomeScreen() {
 
   const [showExercise, setShowExercise] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(mockExercises[0]);
+  const [timeToNextBreak, setTimeToNextBreak] = useState("--:--");
+  const [settings, setSettings] = useState(mockSettings);
+
+  // Load settings when screen focuses
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem("reminderSettings").then((value) => {
+        if (value) {
+          setSettings({ ...mockSettings, ...JSON.parse(value) });
+        }
+      });
+    }, [])
+  );
+
+  // Timer Logic
+  useEffect(() => {
+    if (!remindersEnabled) {
+      setTimeToNextBreak("Paused");
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = new Date();
+      const [startH, startM] = settings.workStartTime.split(":").map(Number);
+      const [endH, endM] = settings.workEndTime.split(":").map(Number);
+
+      const start = new Date();
+      start.setHours(startH, startM, 0, 0);
+
+      const end = new Date();
+      end.setHours(endH, endM, 0, 0);
+
+      if (now < start) {
+        const diff = start.getTime() - now.getTime();
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setTimeToNextBreak(
+          `${h}:${m.toString().padStart(2, "0")}:${s
+            .toString()
+            .padStart(2, "0")}`
+        );
+        return;
+      }
+
+      if (now > end) {
+        setTimeToNextBreak("Done");
+        return;
+      }
+
+      const elapsedMs = now.getTime() - start.getTime();
+      const intervalMs = settings.reminderInterval * 60 * 1000;
+      const msUntilNext = intervalMs - (elapsedMs % intervalMs);
+      const m = Math.floor(msUntilNext / 60000);
+      const s = Math.floor((msUntilNext % 60000) / 1000);
+
+      if (m >= 60) {
+        const h = Math.floor(m / 60);
+        setTimeToNextBreak(
+          `${h}:${(m % 60).toString().padStart(2, "0")}:${s
+            .toString()
+            .padStart(2, "0")}`
+        );
+      } else {
+        setTimeToNextBreak(
+          `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+        );
+      }
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+    return () => clearInterval(timer);
+  }, [remindersEnabled, settings]);
 
   // -------------------- Handlers --------------------
   const handleEnable = async () => {
@@ -46,7 +121,6 @@ export default function HomeScreen() {
     setShowExercise(true);
   };
 
-  const timeToNextBreak = "23:45";
   const weeklyProgress =
     (mockStats.weeklyCompleted / mockStats.weeklyGoal) * 100;
 
@@ -153,16 +227,16 @@ export default function HomeScreen() {
         {/* Active Categories */}
         <Text style={styles.sectionLabel}>Active Categories</Text>
         <View style={styles.badgeRow}>
-          {mockSettings.enabledCategories.includes("eye") && (
+          {settings.enabledCategories.includes("eye") && (
             <Badge icon={<Zap size={14} color="#6366f1" />} label="Eye Care" />
           )}
-          {mockSettings.enabledCategories.includes("stretch") && (
+          {settings.enabledCategories.includes("stretch") && (
             <Badge
               icon={<Zap size={14} color="#6366f1" />}
               label="Stretching"
             />
           )}
-          {mockSettings.enabledCategories.includes("breathing") && (
+          {settings.enabledCategories.includes("breathing") && (
             <Badge icon={<Zap size={14} color="#6366f1" />} label="Breathing" />
           )}
         </View>
