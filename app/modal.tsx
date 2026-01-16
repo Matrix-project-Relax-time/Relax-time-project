@@ -12,6 +12,7 @@ import {
   Wind,
   Zap,
 } from "lucide-react-native";
+
 import { ExerciseModal } from "../components/ExerciseModal";
 import { mockExercises, mockSettings, mockStats } from "../lib/mock-data";
 

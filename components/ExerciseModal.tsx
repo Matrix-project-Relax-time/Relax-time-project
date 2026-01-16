@@ -1,25 +1,17 @@
 import { useEffect, useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-  Image,
-} from "react-native";
+import { Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
-  X,
-  Play,
-  Pause,
-  RotateCcw,
   Check,
-  Eye,
-  Wind,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  Pause,
+  Play,
+  RotateCcw,
   Speech as Stretch,
+  Wind,
+  X,
 } from "lucide-react-native";
 
 interface ExerciseStep {
@@ -123,10 +115,9 @@ export function ExerciseModal({
       onRequestClose={onClose}
     >
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={onClose} style={styles.iconButton}>
-            <X size={20} />
+          <Pressable onPress={onClose} hitSlop={16} style={styles.iconButton}>
+            <X size={24} color="#000" />
           </Pressable>
 
           <View style={styles.category}>
@@ -137,7 +128,7 @@ export function ExerciseModal({
           <View style={{ width: 36 }} />
         </View>
 
-        <ScrollView>
+        <View>
           {/* Image */}
           <View style={styles.imageWrapper}>
             <Image
@@ -198,7 +189,7 @@ export function ExerciseModal({
               </View>
             </View>
           </View>
-        </ScrollView>
+        </View>
 
         {/* Bottom controls */}
         <View style={styles.footer}>
@@ -252,15 +243,17 @@ const styles = StyleSheet.create({
   },
 
   iconButton: {
-    height: 36,
-    width: 36,
+    height: 60, // bigger height
+    width: 40, // keep width or increase if needed
+    padding: 0, // remove paddingTop
+    paddingTop: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-
   category: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 40,
     gap: 6,
   },
 
@@ -365,7 +358,7 @@ const styles = StyleSheet.create({
   footer: {
     borderTopWidth: 1,
     borderTopColor: "#e5e7eb",
-    padding: 16,
+    padding: 6,
   },
 
   controls: {

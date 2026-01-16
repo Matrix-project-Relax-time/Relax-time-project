@@ -1,4 +1,4 @@
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { JSX, useState } from "react";
 import {
   Image,
@@ -17,7 +17,7 @@ const TABS: { value: Category; label: string; icon: JSX.Element }[] = [
   {
     value: "all",
     label: "All",
-    icon: <MaterialIcons name="auto-awesome" size={16} color="#4F46E5" />,
+    icon: <MaterialIcons name="auto-awesome" size={16} color="#8498d1" />,
   },
   {
     value: "eye",
@@ -32,7 +32,7 @@ const TABS: { value: Category; label: string; icon: JSX.Element }[] = [
   {
     value: "breathing",
     label: "Breath",
-    icon: <Ionicons name="water-outline" size={16} color="#8B5CF6" />,
+    icon: <Feather name="wind" size={16} color="#000000" />,
   },
 ];
 
@@ -51,9 +51,9 @@ const categoryConfig = {
   },
   breathing: {
     label: "Breathing",
-    color: "#8B5CF6",
+    color: "#97dbca",
     bg: "#EDE9FE",
-    icon: <Ionicons name="water-outline" size={20} color="#8B5CF6" />,
+    icon: <Feather name="wind" size={20} color="#000000" />,
   },
 };
 
