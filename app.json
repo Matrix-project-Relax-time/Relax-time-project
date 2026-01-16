@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "relaxTime",
-    "slug": "relaxTime",
+    "slug": "relax-time",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.relaxTime"
+      "bundleIdentifier": "com.anonymous.relaxTime",
+     
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -45,6 +49,15 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d0282ad7-8cb0-4994-877e-135083f911de"
+      }
+    },
+    "owner": "ankhush"
   }
 }
+ 
+ 
