@@ -1,27 +1,47 @@
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"; // Using Expo icons
-import React, { JSX, useState } from "react";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"; // Expo icon-ууд
+import { JSX, useState } from "react";
 import {
+  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { LineChart } from "react-native-chart-kit";
 import { mockHistory } from "../../lib/mock-data";
 
-// Mock data (replace with your real data or API)
+const screenWidth = Dimensions.get("window").width;
+
 
 type FilterPeriod = "today" | "week" | "all";
 
+/** Ангиллын icon-ууд */
 const CATEGORY_ICONS: Record<string, JSX.Element> = {
   eye: <Feather name="eye" size={20} color="#4F46E5" />,
-  stretch: <MaterialIcons name="accessibility" size={20} color="#4F46E5" />,
-  breathing: <Ionicons name="water-outline" size={20} color="#4F46E5" />,
+  stretch: (
+    <MaterialIcons name="accessibility" size={20} color="#4F46E5" />
+  ),
+  breathing: (
+    <Ionicons name="water-outline" size={20} color="#4F46E5" />
+  ),
 };
 
 export default function HistoryScreen() {
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>("week");
+  // 7 хоногийн completed тоо (жишээ)
+const weeklyChartData = {
+  labels: ["Дав", "Мяг", "Лха", "Пүр", "Баа", "Бям", "Ням"],
+  datasets: [
+    {
+      data: [3, 2, 4, 5, 1, 6, 4],
+      strokeWidth: 2,
+    },
+  ],
+};
 
+
+  /** Шүүлтүүр */
   const filteredHistory =
     filterPeriod === "today"
       ? mockHistory.slice(0, 3)
@@ -32,34 +52,41 @@ export default function HistoryScreen() {
   const completed = filteredHistory.filter(
     (e) => e.status === "completed"
   ).length;
-  const skipped = filteredHistory.filter((e) => e.status === "skipped").length;
+
+  const skipped = filteredHistory.filter(
+    (e) => e.status === "skipped"
+  ).length;
+
   const completionRate =
     filteredHistory.length > 0
       ? Math.round((completed / filteredHistory.length) * 100)
       : 0;
 
-  // Group by date
+  /** Огноогоор бүлэглэх */
   const groupedHistory: Record<string, typeof mockHistory> = {};
-  filteredHistory.forEach((entry: { completedAt: string | number | Date }) => {
+  filteredHistory.forEach((entry) => {
     const date = new Date(entry.completedAt);
-    const key = date.toLocaleDateString("en-US", {
+    const key = date.toLocaleDateString("mn-MN", {
       weekday: "short",
       month: "short",
       day: "numeric",
     });
+
     if (!groupedHistory[key]) groupedHistory[key] = [];
-    groupedHistory[key].push();
+    groupedHistory[key].push(entry);
   });
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+      {/* Толгой хэсэг */}
       <View style={styles.header}>
-        <Text style={styles.title}>History</Text>
-        <Text style={styles.subtitle}>Track your wellness journey</Text>
+        <Text style={styles.title}>Түүх</Text>
+        <Text style={styles.subtitle}>
+          Таны эрүүл мэндийн явцыг хянах
+        </Text>
       </View>
 
-      {/* Filter Buttons */}
+      {/* Шүүлтүүр товчлуурууд */}
       <View style={styles.filterContainer}>
         {(["today", "week", "all"] as FilterPeriod[]).map((period) => (
           <TouchableOpacity
@@ -77,138 +104,140 @@ export default function HistoryScreen() {
               ]}
             >
               {period === "today"
-                ? "Today"
+                ? "Өнөөдөр"
                 : period === "week"
-                ? "This Week"
-                : "All Time"}
+                ? "Энэ 7 хоног"
+                : "Бүх хугацаа"}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Stats */}
+      {/* Статистик */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Feather name="check-circle" size={20} color="#4F46E5" />
           <Text style={styles.statNumber}>{completed}</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+          <Text style={styles.statLabel}>Гүйцэтгэсэн</Text>
         </View>
+
         <View style={styles.statCard}>
           <Feather name="trending-up" size={20} color="#10B981" />
           <Text style={styles.statNumber}>{completionRate}%</Text>
-          <Text style={styles.statLabel}>Rate</Text>
+          <Text style={styles.statLabel}>Амжилтын хувь</Text>
         </View>
+
         <View style={styles.statCard}>
           <Feather name="x-circle" size={20} color="#6B7280" />
           <Text style={styles.statNumber}>{skipped}</Text>
-          <Text style={styles.statLabel}>Skipped</Text>
+          <Text style={styles.statLabel}>Алгассан</Text>
         </View>
-      </View>
+        {/* 7 хоногийн график */}
 
-      {/* History List */}
+      </View>
+      <View style={styles.chartCard}>
+  <Text style={styles.chartTitle}>7 хоногийн гүйцэтгэл</Text>
+
+  <LineChart
+    data={weeklyChartData}
+    width={screenWidth - 12}
+    height={220}
+    yAxisInterval={1}
+    chartConfig={{
+      backgroundGradientFrom: "#FFFFFF",
+      backgroundGradientTo: "#FFFFFF",
+      decimalPlaces: 0,
+      color: (opacity = 1) => `rgba(79, 70, 229, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`,
+      propsForDots: {
+        r: "4",
+        strokeWidth: "2",
+        stroke: "#4F46E5",
+      },
+    }}
+    bezier
+    style={{
+      borderRadius: 4,
+    }}
+  />
+</View>
+
+
+      {/* Түүхийн жагсаалт */}
       {Object.keys(groupedHistory).length === 0 ? (
         <View style={styles.emptyCard}>
           <Feather name="calendar" size={40} color="#6B7280" />
-          <Text style={styles.emptyTitle}>No history yet</Text>
+          <Text style={styles.emptyTitle}>Одоогоор түүх байхгүй</Text>
           <Text style={styles.emptySubtitle}>
-            Complete exercises to track progress
+            Дасгал хийснээр таны ахиц энд харагдана
           </Text>
         </View>
       ) : (
         Object.entries(groupedHistory).map(([date, entries]) => (
           <View key={date} style={{ marginBottom: 20 }}>
             <Text style={styles.groupDate}>{date}</Text>
-            {entries.map(
-              (entry: {
-                status: string;
-                category: string | number;
-                completedAt: string | number | Date;
-                id: React.Key | null | undefined;
-                exerciseName:
-                  | string
-                  | number
-                  | bigint
-                  | boolean
-                  | React.ReactElement<
-                      unknown,
-                      string | React.JSXElementConstructor<any>
-                    >
-                  | Iterable<React.ReactNode>
-                  | React.ReactPortal
-                  | Promise<
-                      | string
-                      | number
-                      | bigint
-                      | boolean
-                      | React.ReactPortal
-                      | React.ReactElement<
-                          unknown,
-                          string | React.JSXElementConstructor<any>
-                        >
-                      | Iterable<React.ReactNode>
-                      | null
-                      | undefined
-                    >
-                  | null
-                  | undefined;
-              }) => {
-                const isCompleted = entry.status === "completed";
-                const Icon = CATEGORY_ICONS[entry.category] || (
+
+            {entries.map((entry) => {
+              const isCompleted = entry.status === "completed";
+              const Icon =
+                CATEGORY_ICONS[entry.category] || (
                   <Feather name="circle" size={20} color="#6B7280" />
                 );
-                const time = new Date(entry.completedAt).toLocaleTimeString(
-                  [],
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                );
 
-                return (
+              const time = new Date(entry.completedAt).toLocaleTimeString(
+                "mn-MN",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              );
+
+              return (
+                <View
+                  key={entry.id}
+                  style={[
+                    styles.historyCard,
+                    !isCompleted && { opacity: 0.5 },
+                  ]}
+                >
                   <View
-                    key={entry.id}
                     style={[
-                      styles.historyCard,
-                      !isCompleted && { opacity: 0.5 },
+                      styles.iconWrapper,
+                      isCompleted
+                        ? { backgroundColor: "#E0E7FF" }
+                        : { backgroundColor: "#F3F4F6" },
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.iconWrapper,
-                        isCompleted
-                          ? { backgroundColor: "#E0E7FF" }
-                          : { backgroundColor: "#F3F4F6" },
-                      ]}
-                    >
-                      {Icon}
-                    </View>
-                    <View style={styles.historyInfo}>
-                      <Text style={styles.exerciseName}>
-                        {entry.exerciseName}
-                      </Text>
-                      <Text style={styles.exerciseTime}>{time}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        isCompleted
-                          ? { backgroundColor: "#E0E7FF" }
-                          : { backgroundColor: "#F3F4F6" },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusText,
-                          isCompleted && { color: "#4F46E5" },
-                        ]}
-                      >
-                        {isCompleted ? "Done" : "Skipped"}
-                      </Text>
-                    </View>
+                    {Icon}
                   </View>
-                );
-              }
-            )}
+
+                  <View style={styles.historyInfo}>
+                    <Text style={styles.exerciseName}>
+                      {entry.exerciseName}
+                    </Text>
+                    <Text style={styles.exerciseTime}>{time}</Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      isCompleted
+                        ? { backgroundColor: "#E0E7FF" }
+                        : { backgroundColor: "#F3F4F6" },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.statusText,
+                        isCompleted && { color: "#4F46E5" },
+                      ]}
+                    >
+                      {isCompleted ? "Гүйцэтгэсэн" : "Алгассан"}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         ))
       )}
@@ -288,4 +317,16 @@ const styles = StyleSheet.create({
   exerciseTime: { fontSize: 10, color: "#6B7280", marginTop: 2 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 },
   statusText: { fontSize: 10, fontWeight: "500", color: "#6B7280" },
+  chartCard: {
+  backgroundColor: "#FFF",
+  borderRadius: 4,
+  padding: 0,
+  marginBottom: 10,
+},
+chartTitle: {
+  fontSize: 14,
+  fontWeight: "600",
+  marginBottom: 8,
+},
+
 });

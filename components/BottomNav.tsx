@@ -5,11 +5,11 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabs = [
-  { href: "/home", label: "Home", icon: Home },
-  { href: "/reminders", label: "Reminders", icon: Bell },
-  { href: "/exercises", label: "Library", icon: Dumbbell },
-  { href: "/history", label: "History", icon: Clock },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/home", label: "Нүүр хуудас", icon: Home },
+  { href: "/reminders", label: "Сануулага", icon: Bell },
+  { href: "/exercises", label: "Сан", icon: Dumbbell },
+  { href: "/history", label: "Хувийн түүх", icon: Clock },
+  { href: "/settings", label: "Тохиргоо", icon: Settings },
 ] as const;
 
 const TabButton = memo(

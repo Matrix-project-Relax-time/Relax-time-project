@@ -1,30 +1,32 @@
-import React, { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-import {
-  Sun,
+  Bell,
+  CheckCircle2,
+  Info,
   Moon,
   Smartphone,
-  Bell,
-  Volume2,
-  Vibrate,
+  Sun,
   Trash2,
-  Info,
-  CheckCircle2,
+  Vibrate,
+  Volume2,
 } from "lucide-react-native";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
+/** Загварын горим */
 type Theme = "light" | "dark" | "system";
 
+/** Загварын сонголтууд */
 const THEME_OPTIONS: { value: Theme; label: string; icon: any }[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Smartphone },
+  { value: "light", label: "Цайвар", icon: Sun },
+  { value: "dark", label: "Харанхуй", icon: Moon },
+  { value: "system", label: "Систем", icon: Smartphone },
 ];
 
 export default function SettingsScreen() {
@@ -35,16 +37,18 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
+      {/* Толгой хэсэг */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <Text style={styles.headerSubtitle}>Customize your experience</Text>
+        <Text style={styles.headerTitle}>Тохиргоо</Text>
+        <Text style={styles.headerSubtitle}>
+          Аппын ажиллагааг өөртөө тохируулна уу
+        </Text>
       </View>
 
-      {/* Notifications */}
+      {/* Мэдэгдлийн тохиргоо */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>
-          <Bell size={16} /> Notifications
+          <Bell size={16} /> Мэдэгдэл
         </Text>
 
         <View style={styles.row}>
@@ -53,8 +57,10 @@ export default function SettingsScreen() {
               <Bell size={16} />
             </View>
             <View>
-              <Text style={styles.rowTitle}>Push Notifications</Text>
-              <Text style={styles.rowSubtitle}>Get reminded for breaks</Text>
+              <Text style={styles.rowTitle}>Push мэдэгдэл</Text>
+              <Text style={styles.rowSubtitle}>
+                Завсарлага сануулах мэдэгдэл авна
+              </Text>
             </View>
           </View>
           <Switch value={notifications} onValueChange={setNotifications} />
@@ -66,8 +72,10 @@ export default function SettingsScreen() {
               <Volume2 size={16} />
             </View>
             <View>
-              <Text style={styles.rowTitle}>Sound</Text>
-              <Text style={styles.rowSubtitle}>Play notification sound</Text>
+              <Text style={styles.rowTitle}>Дуу</Text>
+              <Text style={styles.rowSubtitle}>
+                Мэдэгдлийн дуу тоглуулах
+              </Text>
             </View>
           </View>
           <Switch value={sound} onValueChange={setSound} />
@@ -79,21 +87,24 @@ export default function SettingsScreen() {
               <Vibrate size={16} />
             </View>
             <View>
-              <Text style={styles.rowTitle}>Vibration</Text>
-              <Text style={styles.rowSubtitle}>Haptic feedback</Text>
+              <Text style={styles.rowTitle}>Чичиргээ</Text>
+              <Text style={styles.rowSubtitle}>
+                Чичиргээт мэдрэмж (haptic)
+              </Text>
             </View>
           </View>
           <Switch value={vibration} onValueChange={setVibration} />
         </View>
       </View>
 
-      {/* Theme */}
+      {/* Гадаад төрх */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Appearance</Text>
+        <Text style={styles.cardTitle}>Гадаад төрх</Text>
         <View style={styles.themeOptions}>
           {THEME_OPTIONS.map((option) => {
             const Icon = option.icon;
             const isSelected = theme === option.value;
+
             return (
               <TouchableOpacity
                 key={option.value}
@@ -122,43 +133,50 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* Notification Status */}
+      {/* Мэдэгдлийн төлөв */}
       <View style={styles.card}>
         <View style={styles.statusCard}>
           <CheckCircle2 size={20} color="#3b82f6" />
           <View style={{ marginLeft: 10 }}>
-            <Text style={styles.rowTitle}>Notifications enabled</Text>
+            <Text style={styles.rowTitle}>
+              Мэдэгдэл идэвхтэй байна
+            </Text>
             <Text style={styles.rowSubtitle}>
-              You will receive break reminders
+              Та завсарлагын сануулга хүлээн авна
             </Text>
           </View>
         </View>
       </View>
 
-      {/* About */}
+      {/* Тухай */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>
-          <Info size={16} /> About
+          <Info size={16} /> Аппын тухай
         </Text>
+
         <View style={styles.aboutRow}>
-          <Text style={styles.rowSubtitle}>Version</Text>
+          <Text style={styles.rowSubtitle}>Хувилбар</Text>
           <Text style={styles.rowTitle}>1.0.0</Text>
         </View>
+
         <View style={styles.aboutRow}>
-          <Text style={styles.rowSubtitle}>Exercises</Text>
+          <Text style={styles.rowSubtitle}>Дасгалын тоо</Text>
           <Text style={styles.rowTitle}>12</Text>
         </View>
+
         <View style={styles.aboutRow}>
-          <Text style={styles.rowSubtitle}>Categories</Text>
+          <Text style={styles.rowSubtitle}>Ангиллын тоо</Text>
           <Text style={styles.rowTitle}>3</Text>
         </View>
       </View>
 
-      {/* Clear Data */}
+      {/* Өгөгдөл цэвэрлэх */}
       <View style={styles.card}>
         <TouchableOpacity style={styles.clearButton}>
           <Trash2 size={16} stroke="white" />
-          <Text style={styles.clearButtonText}>Clear All Data</Text>
+          <Text style={styles.clearButtonText}>
+            Бүх өгөгдлийг устгах
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

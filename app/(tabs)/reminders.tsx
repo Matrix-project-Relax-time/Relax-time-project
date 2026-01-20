@@ -1,56 +1,65 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import Slider from "@react-native-community/slider";
 import {
   Bell,
   Eye,
-  Wind,
-  Volume2,
   StretchHorizontal,
+  Volume2,
+  Wind,
 } from "lucide-react-native";
-import Slider from "@react-native-community/slider";
+import { useContext, useEffect, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ReminderContext } from "../../components/reminderContext";
 
+/* =========================
+   Долоо хоногийн өдрүүд
+========================= */
 const DAYS = [
-  { value: 0, label: "S" },
-  { value: 1, label: "M" },
-  { value: 2, label: "T" },
-  { value: 3, label: "W" },
-  { value: 4, label: "T" },
-  { value: 5, label: "F" },
-  { value: 6, label: "S" },
+  { value: 0, label: "Ня" },
+  { value: 1, label: "Да" },
+  { value: 2, label: "Мя" },
+  { value: 3, label: "Лх" },
+  { value: 4, label: "Пү" },
+  { value: 5, label: "Ба" },
+  { value: 6, label: "Бя" },
 ];
 
+/* =========================
+   Дасгалын ангиллууд
+========================= */
 const CATEGORIES = [
   {
     value: "eye",
-    label: "Eye Care",
+    label: "Нүдний дасгал",
     icon: Eye,
-    description: "Reduce eye strain",
+    description: "Нүдний ядаргааг багасгана",
   },
   {
     value: "stretch",
-    label: "Stretching",
+    label: "Сунгалт",
     icon: StretchHorizontal,
-    description: "Release tension",
+    description: "Булчинг суллана",
   },
   {
     value: "breathing",
-    label: "Breathing",
+    label: "Амьсгал",
     icon: Wind,
-    description: "Calm your mind",
+    description: "Тайвшруулж, анхаарал төвлөрүүлнэ",
   },
 ];
 
+/* =========================
+   Анхны тохиргоо
+========================= */
 const mockSettings = {
   workStartTime: "09:00",
   workEndTime: "17:00",
@@ -61,42 +70,67 @@ const mockSettings = {
 };
 
 export default function RemindersScreen() {
-  const { remindersEnabled, setRemindersEnabled } = useContext(ReminderContext);
+  const { remindersEnabled, setRemindersEnabled } =
+    useContext(ReminderContext);
 
-  const [startTime, setStartTime] = useState(mockSettings.workStartTime);
-  const [endTime, setEndTime] = useState(mockSettings.workEndTime);
-  const [workDays, setWorkDays] = useState(mockSettings.workDays);
-  const [interval, setInterval] = useState(mockSettings.reminderInterval);
-  const [categories, setCategories] = useState(mockSettings.enabledCategories);
-  const [soundEnabled, setSoundEnabled] = useState(mockSettings.soundEnabled);
+  const [startTime, setStartTime] =
+    useState(mockSettings.workStartTime);
+  const [endTime, setEndTime] =
+    useState(mockSettings.workEndTime);
+  const [workDays, setWorkDays] =
+    useState(mockSettings.workDays);
+  const [interval, setInterval] =
+    useState(mockSettings.reminderInterval);
+  const [categories, setCategories] =
+    useState(mockSettings.enabledCategories);
+  const [soundEnabled, setSoundEnabled] =
+    useState(mockSettings.soundEnabled);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load saved settings on mount
+  /* =========================
+     Тохиргоо унших
+  ========================= */
   useEffect(() => {
     const loadSettings = async () => {
-      const enabledVal = await AsyncStorage.getItem("remindersEnabled");
-      if (enabledVal !== null) setRemindersEnabled(enabledVal === "true");
+      const enabledVal =
+        await AsyncStorage.getItem("remindersEnabled");
+      if (enabledVal !== null)
+        setRemindersEnabled(enabledVal === "true");
 
-      const settingsVal = await AsyncStorage.getItem("reminderSettings");
+      const settingsVal =
+        await AsyncStorage.getItem("reminderSettings");
       if (settingsVal) {
         const parsed = JSON.parse(settingsVal);
-        setStartTime(parsed.workStartTime ?? mockSettings.workStartTime);
-        setEndTime(parsed.workEndTime ?? mockSettings.workEndTime);
-        setWorkDays(parsed.workDays ?? mockSettings.workDays);
-        setInterval(parsed.reminderInterval ?? mockSettings.reminderInterval);
-        setCategories(
-          parsed.enabledCategories ?? mockSettings.enabledCategories
+        setStartTime(
+          parsed.workStartTime ?? mockSettings.workStartTime
         );
-        setSoundEnabled(parsed.soundEnabled ?? mockSettings.soundEnabled);
+        setEndTime(
+          parsed.workEndTime ?? mockSettings.workEndTime
+        );
+        setWorkDays(parsed.workDays ?? mockSettings.workDays);
+        setInterval(
+          parsed.reminderInterval ??
+            mockSettings.reminderInterval
+        );
+        setCategories(
+          parsed.enabledCategories ??
+            mockSettings.enabledCategories
+        );
+        setSoundEnabled(
+          parsed.soundEnabled ?? mockSettings.soundEnabled
+        );
       }
       setIsLoaded(true);
     };
     loadSettings();
   }, []);
 
-  // Save settings on change
+  /* =========================
+     Тохиргоо хадгалах
+  ========================= */
   useEffect(() => {
     if (!isLoaded) return;
+
     const settings = {
       workStartTime: startTime,
       workEndTime: endTime,
@@ -105,7 +139,11 @@ export default function RemindersScreen() {
       enabledCategories: categories,
       soundEnabled,
     };
-    AsyncStorage.setItem("reminderSettings", JSON.stringify(settings));
+
+    AsyncStorage.setItem(
+      "reminderSettings",
+      JSON.stringify(settings)
+    );
   }, [
     startTime,
     endTime,
@@ -139,22 +177,33 @@ export default function RemindersScreen() {
   const endMins =
     parseInt(endTime.split(":")[0], 10) * 60 +
     parseInt(endTime.split(":")[1], 10);
-  const reminderCount = Math.floor((endMins - startMins) / interval);
+
+  const reminderCount = Math.floor(
+    (endMins - startMins) / interval
+  );
 
   const handleToggleReminders = async (value: boolean) => {
     setRemindersEnabled(value);
-    await AsyncStorage.setItem("remindersEnabled", JSON.stringify(value));
+    await AsyncStorage.setItem(
+      "remindersEnabled",
+      JSON.stringify(value)
+    );
   };
 
+  /* =========================
+     Render
+  ========================= */
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
+      {/* Толгой хэсэг */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Reminders</Text>
-        <Text style={styles.headerSubtitle}>Configure your break schedule</Text>
+        <Text style={styles.headerTitle}>Сануулга</Text>
+        <Text style={styles.headerSubtitle}>
+          Амралтын сануулгын тохиргоо
+        </Text>
       </View>
 
-      {/* Master Toggle */}
+      {/* Ерөнхий асаах / унтраах */}
       <View style={styles.card}>
         <View style={styles.row}>
           <View style={styles.rowLeft}>
@@ -162,25 +211,26 @@ export default function RemindersScreen() {
               <Bell size={20} />
             </View>
             <View>
-              <Text style={styles.rowTitle}>Reminders</Text>
+              <Text style={styles.rowTitle}>Сануулга</Text>
               <Text style={styles.rowSubtitle}>
-                {remindersEnabled ? "Active" : "Paused"}
+                {remindersEnabled ? "Идэвхтэй" : "Түр зогссон"}
               </Text>
             </View>
           </View>
           <Switch
-            value={!!remindersEnabled} // coerce null/undefined to false
+            value={!!remindersEnabled}
             onValueChange={handleToggleReminders}
           />
         </View>
       </View>
 
-      {/* Work Hours */}
+      {/* Ажлын цаг */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Work Hours</Text>
+        <Text style={styles.sectionTitle}>Ажлын цаг</Text>
+
         <View style={styles.timeRow}>
           <View style={styles.timeContainer}>
-            <Text style={styles.timeLabel}>Start</Text>
+            <Text style={styles.timeLabel}>Эхлэх цаг</Text>
             <TextInput
               style={styles.timeInput}
               value={startTime}
@@ -189,7 +239,7 @@ export default function RemindersScreen() {
             />
           </View>
           <View style={styles.timeContainer}>
-            <Text style={styles.timeLabel}>End</Text>
+            <Text style={styles.timeLabel}>Дуусах цаг</Text>
             <TextInput
               style={styles.timeInput}
               value={endTime}
@@ -199,21 +249,23 @@ export default function RemindersScreen() {
           </View>
         </View>
 
-        <Text style={styles.timeLabel}>Work Days</Text>
+        <Text style={styles.timeLabel}>Ажлын өдрүүд</Text>
         <View style={styles.daysRow}>
           {DAYS.map((day) => (
             <TouchableOpacity
               key={day.value}
               style={[
                 styles.dayButton,
-                workDays.includes(day.value) && styles.dayButtonActive,
+                workDays.includes(day.value) &&
+                  styles.dayButtonActive,
               ]}
               onPress={() => toggleDay(day.value)}
             >
               <Text
                 style={[
                   styles.dayText,
-                  workDays.includes(day.value) && styles.dayTextActive,
+                  workDays.includes(day.value) &&
+                    styles.dayTextActive,
                 ]}
               >
                 {day.label}
@@ -223,12 +275,17 @@ export default function RemindersScreen() {
         </View>
       </View>
 
-      {/* Interval */}
+      {/* Интервал */}
       <View style={styles.card}>
         <View style={styles.row}>
-          <Text style={styles.sectionTitle}>Break Interval</Text>
-          <Text style={styles.intervalText}>{interval}m</Text>
+          <Text style={styles.sectionTitle}>
+            Амралтын давтамж
+          </Text>
+          <Text style={styles.intervalText}>
+            {interval} мин
+          </Text>
         </View>
+
         <Slider
           minimumValue={15}
           maximumValue={120}
@@ -238,50 +295,76 @@ export default function RemindersScreen() {
           thumbTintColor="#6465f0"
           onValueChange={setInterval}
         />
+
         <View style={styles.sliderLabels}>
-          <Text style={styles.sliderLabel}>15 min</Text>
-          <Text style={styles.sliderLabel}>120 min</Text>
+          <Text style={styles.sliderLabel}>15 мин</Text>
+          <Text style={styles.sliderLabel}>120 мин</Text>
         </View>
+
         <View style={styles.reminderCount}>
-          <Text style={styles.reminderNumber}>{reminderCount}</Text>
-          <Text style={styles.rowSubtitle}>reminders per day</Text>
+          <Text style={styles.reminderNumber}>
+            {reminderCount}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            Өдөрт ирэх сануулга
+          </Text>
         </View>
       </View>
 
-      {/* Categories */}
+      {/* Дасгалын төрөл */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Exercise Types</Text>
+        <Text style={styles.sectionTitle}>
+          Дасгалын төрөл
+        </Text>
+
         {CATEGORIES.map((cat) => {
           const isActive = categories.includes(cat.value);
           return (
             <TouchableOpacity
               key={cat.value}
-              style={[styles.categoryButton, isActive && styles.categoryActive]}
+              style={[
+                styles.categoryButton,
+                isActive && styles.categoryActive,
+              ]}
               onPress={() => toggleCategory(cat.value)}
             >
               <View
                 style={[
                   styles.categoryIcon,
-                  isActive && styles.categoryIconActive,
+                  isActive &&
+                    styles.categoryIconActive,
                 ]}
               >
                 <cat.icon size={16} />
               </View>
+
               <View style={styles.categoryText}>
-                <Text style={styles.rowTitle}>{cat.label}</Text>
-                <Text style={styles.rowSubtitle}>{cat.description}</Text>
+                <Text style={styles.rowTitle}>
+                  {cat.label}
+                </Text>
+                <Text style={styles.rowSubtitle}>
+                  {cat.description}
+                </Text>
               </View>
+
               <View
-                style={[styles.checkbox, isActive && styles.checkboxActive]}
+                style={[
+                  styles.checkbox,
+                  isActive && styles.checkboxActive,
+                ]}
               >
-                {isActive && <Text style={styles.checkboxCheck}>✓</Text>}
+                {isActive && (
+                  <Text style={styles.checkboxCheck}>
+                    ✓
+                  </Text>
+                )}
               </View>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {/* Sound */}
+      {/* Дуу */}
       <View style={styles.card}>
         <View style={styles.row}>
           <View style={styles.rowLeft}>
@@ -289,18 +372,25 @@ export default function RemindersScreen() {
               <Volume2 size={20} />
             </View>
             <View>
-              <Text style={styles.rowTitle}>Sound</Text>
-              <Text style={styles.rowSubtitle}>Play notification sound</Text>
+              <Text style={styles.rowTitle}>Дуу</Text>
+              <Text style={styles.rowSubtitle}>
+                Сануулгын дуу тоглуулах
+              </Text>
             </View>
           </View>
-          <Switch value={soundEnabled} onValueChange={setSoundEnabled} />
+          <Switch
+            value={soundEnabled}
+            onValueChange={setSoundEnabled}
+          />
         </View>
       </View>
     </ScrollView>
   );
 }
 
-// You can keep your existing styles here
+/* =========================
+   Styles (өөрчлөгдөөгүй)
+========================= */
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 50, paddingTop: 50, flex: 1 },
   header: { marginBottom: 20 },

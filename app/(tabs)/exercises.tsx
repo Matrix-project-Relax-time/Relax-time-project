@@ -11,56 +11,60 @@ import {
 } from "react-native";
 import { mockExercises } from "../../lib/mock-data";
 
+/** Дасгалын ангиллууд */
 type Category = "all" | "eye" | "stretch" | "breathing";
 
+/** Таб цэс */
 const TABS: { value: Category; label: string; icon: JSX.Element }[] = [
   {
     value: "all",
-    label: "All",
+    label: "Бүгд",
     icon: <MaterialIcons name="auto-awesome" size={16} color="#4F46E5" />,
   },
   {
     value: "eye",
-    label: "Eye",
+    label: "Нүд",
     icon: <Feather name="eye" size={16} color="#3B82F6" />,
   },
   {
     value: "stretch",
-    label: "Stretch",
+    label: "Сунгалт",
     icon: <MaterialIcons name="accessibility" size={16} color="#10B981" />,
   },
   {
     value: "breathing",
-    label: "Breath",
+    label: "Амьсгал",
     icon: <Ionicons name="water-outline" size={16} color="#8B5CF6" />,
   },
 ];
 
+/** Ангилал тус бүрийн тохиргоо */
 const categoryConfig = {
   eye: {
-    label: "Eye Care",
+    label: "Нүдний дасгал",
     color: "#3B82F6",
     bg: "#DBEAFE",
     icon: <Feather name="eye" size={20} color="#3B82F6" />,
   },
   stretch: {
-    label: "Stretching",
+    label: "Сунгалтын дасгал",
     color: "#10B981",
     bg: "#D1FAE5",
     icon: <MaterialIcons name="accessibility" size={20} color="#10B981" />,
   },
   breathing: {
-    label: "Breathing",
+    label: "Амьсгалын дасгал",
     color: "#8B5CF6",
     bg: "#EDE9FE",
     icon: <Ionicons name="water-outline" size={20} color="#8B5CF6" />,
   },
 };
 
+/** Хугацааг секундээс ойлгомжтой текст болгох */
 function formatDuration(seconds: number): string {
   return seconds >= 60
-    ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
-    : `${seconds}s`;
+    ? `${Math.floor(seconds / 60)} мин ${seconds % 60} сек`
+    : `${seconds} сек`;
 }
 
 export default function ExercisesScreen() {
@@ -69,11 +73,13 @@ export default function ExercisesScreen() {
     (typeof mockExercises)[0] | null
   >(null);
 
+  /** Сонгосон таб-аар шүүх */
   const filteredExercises =
     activeTab === "all"
       ? mockExercises
       : mockExercises.filter((e) => e.category === activeTab);
 
+  /** Санамсаргүй дасгал авах */
   const getRandomExercise = (category: "eye" | "stretch" | "breathing") => {
     const exercises = mockExercises.filter((e) => e.category === category);
     return exercises[Math.floor(Math.random() * exercises.length)];
@@ -81,13 +87,15 @@ export default function ExercisesScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+      {/* Гарчиг */}
       <View style={styles.header}>
-        <Text style={styles.title}>Exercises</Text>
-        <Text style={styles.subtitle}>Browse and start exercises</Text>
+        <Text style={styles.title}>Дасгалууд</Text>
+        <Text style={styles.subtitle}>
+          Дасгал сонгож эхлүүлэх боломжтой
+        </Text>
       </View>
 
-      {/* Category Tabs */}
+      {/* Ангиллын табууд */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -99,6 +107,7 @@ export default function ExercisesScreen() {
             tab.value === "all"
               ? mockExercises.length
               : mockExercises.filter((e) => e.category === tab.value).length;
+
           return (
             <TouchableOpacity
               key={tab.value}
@@ -130,7 +139,7 @@ export default function ExercisesScreen() {
         })}
       </ScrollView>
 
-      {/* Exercise List */}
+      {/* Дасгалын жагсаалт */}
       <View style={{ marginVertical: 12 }}>
         {filteredExercises.map((exercise) => {
           const config = categoryConfig[exercise.category];
@@ -160,11 +169,13 @@ export default function ExercisesScreen() {
                       {config.label}
                     </Text>
                   </View>
+
                   <Text
                     style={{ fontWeight: "600", fontSize: 14, marginBottom: 2 }}
                   >
                     {exercise.name}
                   </Text>
+
                   <Text
                     style={{ fontSize: 12, color: "#6B7280" }}
                     numberOfLines={1}
@@ -172,6 +183,7 @@ export default function ExercisesScreen() {
                     {exercise.description}
                   </Text>
                 </View>
+
                 <View
                   style={{
                     flexDirection: "row",
@@ -197,10 +209,12 @@ export default function ExercisesScreen() {
                         {formatDuration(exercise.duration)}
                       </Text>
                     </View>
+
                     <Text style={{ fontSize: 10, color: "#6B7280" }}>
-                      {exercise.steps.length} steps
+                      {exercise.steps.length} алхам
                     </Text>
                   </View>
+
                   <TouchableOpacity
                     style={styles.startButton}
                     onPress={() => setSelectedExercise(exercise)}
@@ -213,7 +227,7 @@ export default function ExercisesScreen() {
                     <Text
                       style={{ fontSize: 10, color: "#FFFFFF", marginLeft: 4 }}
                     >
-                      Start
+                      Эхлэх
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -223,9 +237,9 @@ export default function ExercisesScreen() {
         })}
       </View>
 
-      {/* Quick Start */}
+      {/* Түргэн эхлүүлэх */}
       <View>
-        <Text style={styles.quickTitle}>Quick Start</Text>
+        <Text style={styles.quickTitle}>Түргэн эхлүүлэх</Text>
         <View style={styles.quickGrid}>
           {(["eye", "stretch", "breathing"] as const).map((category) => {
             const config = categoryConfig[category];
@@ -245,7 +259,7 @@ export default function ExercisesScreen() {
         </View>
       </View>
 
-      {/* Exercise Modal */}
+      {/* Дасгалын дэлгэрэнгүй modal */}
       <Modal visible={!!selectedExercise} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -255,11 +269,14 @@ export default function ExercisesScreen() {
             <Text style={{ fontSize: 12, color: "#6B7280" }}>
               {selectedExercise?.description}
             </Text>
+
             <TouchableOpacity
               style={styles.modalClose}
               onPress={() => setSelectedExercise(null)}
             >
-              <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>Close</Text>
+              <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                Хаах
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
