@@ -11,37 +11,14 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
-
-/* ---------------- THEME ---------------- */
-
-type ThemeMode = "light" | "dark" | "system";
-
-const lightTheme = {
-  background: "#ffffff",
-  card: "#f3f4f6",
-  text: "#111827",
-  subText: "#6b7280",
-  iconBg: "#e5e7eb",
-  primary: "#3b82f6",
-  danger: "#ef4444",
-};
-
-const darkTheme = {
-  background: "#0f172a",
-  card: "#1e293b",
-  text: "#f8fafc",
-  subText: "#94a3b8",
-  iconBg: "#334155",
-  primary: "#3b82f6",
-  danger: "#ef4444",
-};
+import { useTheme } from "../../components/ThemeContext";
 
 const THEME_OPTIONS = [
   { value: "light", label: "Light", icon: Sun },
@@ -52,24 +29,18 @@ const THEME_OPTIONS = [
 /* ---------------- SCREEN ---------------- */
 
 export default function SettingsScreen() {
-  const systemTheme = useColorScheme(); // light | dark
-
-  const [themeMode, setThemeMode] = useState<ThemeMode>("system");
+  const { theme, themeMode, setThemeMode } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [sound, setSound] = useState(true);
   const [vibration, setVibration] = useState(true);
 
-  const theme =
-    themeMode === "system"
-      ? systemTheme === "dark"
-        ? darkTheme
-        : lightTheme
-      : themeMode === "dark"
-      ? darkTheme
-      : lightTheme;
-
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: theme.background },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: theme.text }]}>
@@ -106,7 +77,11 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </View>
-          <Switch value={notifications} onValueChange={setNotifications} />
+          <Switch
+            trackColor={{ false: "#d1d5db", true: "#6465f0" }} // background
+            value={notifications}
+            onValueChange={setNotifications}
+          />
         </View>
 
         {/* Sound */}
@@ -126,7 +101,11 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </View>
-          <Switch value={sound} onValueChange={setSound} />
+          <Switch
+            trackColor={{ false: "#d1d5db", true: "#6465f0" }}
+            value={sound}
+            onValueChange={setSound}
+          />
         </View>
 
         {/* Vibration */}
@@ -146,7 +125,11 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </View>
-          <Switch value={vibration} onValueChange={setVibration} />
+          <Switch
+            trackColor={{ false: "#d1d5db", true: "#6465f0" }}
+            value={vibration}
+            onValueChange={setVibration}
+          />
         </View>
       </View>
 
@@ -254,7 +237,7 @@ export default function SettingsScreen() {
           <Text style={styles.clearButtonText}>Clear All Data</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -274,9 +257,9 @@ const styles = StyleSheet.create({
 
   card: {
     borderRadius: 12,
-    padding: 16,
+    padding: 13,
     marginBottom: 10,
-    paddingTop: 10,
+    paddingTop: 11,
   },
 
   sectionHeader: {

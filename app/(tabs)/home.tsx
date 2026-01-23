@@ -1,6 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useFocusEffect } from "expo-router";
 import {
   CheckCircle2,
   Flame,
@@ -9,7 +9,7 @@ import {
   Target,
   Zap,
 } from "lucide-react-native";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -18,13 +18,16 @@ import {
   Text,
   View,
 } from "react-native";
-import { mockExercises, mockSettings, mockStats } from "../../lib/mock-data";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { Exercise, HistoryItem, useData } from "../../components/DataContext";
 import { DraggableModal } from "../../components/DragableModal";
 import { ExerciseModal } from "../../components/ExerciseModal";
 import { ReminderModal } from "../../components/Reminder-modal";
 import { ReminderContext } from "../../components/reminderContext";
+import { useTheme } from "../../components/ThemeContext";
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true, // alert гаргах
@@ -80,6 +83,7 @@ export async function sendTestNotification(seconds: number = 10) {
 }
 
 export default function HomeScreen() {
+  const { theme } = useTheme();
   const {
     reminderModalVisible,
     setReminderModalVisible,
@@ -87,40 +91,87 @@ export default function HomeScreen() {
     setRemindersEnabled,
   } = useContext(ReminderContext);
 
+  // Use Global Data
+  const { settings, exercises, stats, addHistoryItem } = useData();
+
   const [showExercise, setShowExercise] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState(mockExercises[0]);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null,
+  );
   const [timeToNextBreak, setTimeToNextBreak] = useState("--:--");
-  const [settings, setSettings] = useState(mockSettings);
+
+  const scheduleNextBreak = async () => {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== "granted") {
+      const { status: newStatus } =
+        await Notifications.requestPermissionsAsync();
+      if (newStatus !== "granted") return;
+    }
+
+    if (!settings) return;
+
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    const now = new Date();
+    const [startH, startM] = settings.workStartTime.split(":").map(Number);
+    const [endH, endM] = settings.workEndTime.split(":").map(Number);
+
+    const start = new Date();
+    start.setHours(startH, startM, 0, 0);
+
+    const end = new Date();
+    end.setHours(endH, endM, 0, 0);
+
+    if (now > end) return;
+
+    let triggerSeconds = 0;
+
+    if (now < start) {
+      triggerSeconds = (start.getTime() - now.getTime()) / 1000;
+    } else {
+      const elapsedMs = now.getTime() - start.getTime();
+      const intervalMs = settings.reminderInterval * 60 * 1000;
+      const msUntilNext = intervalMs - (elapsedMs % intervalMs);
+      triggerSeconds = msUntilNext / 1000;
+    }
+
+    if (triggerSeconds > 0) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Time for a break! 🧘",
+          body: "Take a moment to relax and stretch.",
+          sound: "default",
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: triggerSeconds,
+          repeats: false,
+        },
+      });
+    }
+  };
+
   useEffect(() => {
     if (remindersEnabled) {
-      sendTestNotification(10);
+      scheduleNextBreak();
+    } else {
+      Notifications.cancelAllScheduledNotificationsAsync();
     }
-  }, [remindersEnabled]);
+  }, [remindersEnabled, settings]);
 
   // Notification-д сонсох listener (foreground-д alert)
   useEffect(() => {
     const subscription = Notifications.addNotificationReceivedListener(
       (notification) => {
         console.log("Notification received:", notification);
-      }
+      },
     );
     return () => subscription.remove();
   }, []);
 
-  // Load settings when screen focuses
-  useFocusEffect(
-    useCallback(() => {
-      AsyncStorage.getItem("reminderSettings").then((value) => {
-        if (value) {
-          setSettings({ ...mockSettings, ...JSON.parse(value) });
-        }
-      });
-    }, [])
-  );
-
   // Timer Logic
   useEffect(() => {
-    if (!remindersEnabled) {
+    if (!remindersEnabled || !settings) {
       setTimeToNextBreak("Paused");
       return;
     }
@@ -144,7 +195,7 @@ export default function HomeScreen() {
         setTimeToNextBreak(
           `${h}:${m.toString().padStart(2, "0")}:${s
             .toString()
-            .padStart(2, "0")}`
+            .padStart(2, "0")}`,
         );
         return;
       }
@@ -165,11 +216,11 @@ export default function HomeScreen() {
         setTimeToNextBreak(
           `${h}:${(m % 60).toString().padStart(2, "0")}:${s
             .toString()
-            .padStart(2, "0")}`
+            .padStart(2, "0")}`,
         );
       } else {
         setTimeToNextBreak(
-          `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+          `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`,
         );
       }
     };
@@ -193,13 +244,58 @@ export default function HomeScreen() {
   };
 
   const handleStartExercise = () => {
-    const randomIndex = Math.floor(Math.random() * mockExercises.length);
-    setSelectedExercise(mockExercises[randomIndex]);
+    if (exercises.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * exercises.length);
+    setSelectedExercise(exercises[randomIndex]);
     setShowExercise(true);
   };
 
-  const weeklyProgress =
-    (mockStats.weeklyCompleted / mockStats.weeklyGoal) * 100;
+  const handleExerciseComplete = async (completed: boolean) => {
+    setShowExercise(false);
+    if (completed && selectedExercise) {
+      const newEntry: HistoryItem = {
+        id: Date.now().toString(),
+        exerciseId: selectedExercise.id,
+        exerciseName: selectedExercise.name,
+        category: selectedExercise.category,
+        completedAt: new Date().toISOString(),
+        status: "completed", // now TS knows it's the correct literal type
+      };
+
+      try {
+        const existing = await AsyncStorage.getItem("exerciseHistory");
+        const history = existing ? JSON.parse(existing) : [];
+        const updatedHistory = [newEntry, ...history];
+        await AsyncStorage.setItem(
+          "exerciseHistory",
+          JSON.stringify(updatedHistory),
+        );
+
+        // Update global context state
+        addHistoryItem(newEntry);
+
+        // Save to backend
+        try {
+          // Replace with your backend URL (e.g., http://10.0.2.2:5000 for Android Emulator)
+          await fetch(`http://172.20.10.2:5000/api/history`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newEntry),
+          });
+        } catch (err) {
+          console.log("Failed to save to backend:", err);
+        }
+      } catch (e) {
+        console.error("Failed to save history", e);
+      }
+    }
+  };
+
+  const weeklyProgress = stats
+    ? (stats.weeklyCompleted / stats.weeklyGoal) * 100
+    : 0;
 
   // -------------------- Reusable Components --------------------
   function StatCard({
@@ -212,21 +308,23 @@ export default function HomeScreen() {
     value: string | number;
   }) {
     return (
-      <View style={styles.statCard}>
+      <View style={[styles.statCard, { backgroundColor: theme.card }]}>
         <View style={styles.statHeader}>
           {icon}
-          <Text style={styles.statLabel}>{label}</Text>
+          <Text style={[styles.statLabel, { color: theme.subText }]}>
+            {label}
+          </Text>
         </View>
-        <Text style={styles.statValue}>{value}</Text>
+        <Text style={[styles.statValue, { color: theme.text }]}>{value}</Text>
       </View>
     );
   }
 
   function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
     return (
-      <View style={styles.badge}>
+      <View style={[styles.badge, { backgroundColor: theme.card }]}>
         {icon}
-        <Text style={styles.badgeText}>{label}</Text>
+        <Text style={[styles.badgeText, { color: theme.text }]}>{label}</Text>
       </View>
     );
   }
@@ -234,21 +332,38 @@ export default function HomeScreen() {
   // -------------------- Render --------------------
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: theme.background },
+        ]}
+      >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.subtitle}>Good morning</Text>
+          <Text style={[styles.subtitle, { color: theme.subText }]}>
+            Good morning
+          </Text>
           <View style={styles.titleRow}>
-            <Text style={styles.title}>Matrix</Text>
+            <Text style={[styles.title, { color: theme.text }]}>Matrix</Text>
             <Zap size={18} color="#6366f1" />
           </View>
         </View>
 
         {/* Timer Card */}
         {remindersEnabled ? (
-          <View style={[styles.card, styles.timerCard]}>
-            <Text style={styles.mutedText}>Next break in</Text>
-            <Text style={styles.timer}>{timeToNextBreak}</Text>
+          <View
+            style={[
+              styles.card,
+              styles.timerCard,
+              { backgroundColor: theme.card },
+            ]}
+          >
+            <Text style={[styles.mutedText, { color: theme.subText }]}>
+              Next break in
+            </Text>
+            <Text style={[styles.timer, { color: theme.text }]}>
+              {timeToNextBreak}
+            </Text>
 
             <Pressable
               style={styles.primaryButton}
@@ -259,8 +374,10 @@ export default function HomeScreen() {
             </Pressable>
           </View>
         ) : (
-          <View style={styles.card}>
-            <Text style={styles.sectionLabel}>Reminders are disabled.</Text>
+          <View style={[styles.card, { backgroundColor: theme.card }]}>
+            <Text style={[styles.sectionLabel, { color: theme.subText }]}>
+              Reminders are disabled.
+            </Text>
           </View>
         )}
 
@@ -269,32 +386,38 @@ export default function HomeScreen() {
           <StatCard
             icon={<CheckCircle2 size={16} color="#6366f1" />}
             label="Completed"
-            value={mockStats.todayCompleted}
+            value={stats?.todayCompleted ?? 0}
           />
           <StatCard
             icon={<SkipForward size={16} color="#6366f1" />}
             label="Skipped"
-            value={mockStats.todaySkipped}
+            value={stats?.todaySkipped ?? 0}
           />
           <StatCard
             icon={<Flame size={16} color="#f97316" />}
             label="Streak"
-            value={`${mockStats.streak} days`}
+            value={`${stats?.streak ?? 0} days`}
           />
           <StatCard
             icon={<Target size={16} color="#6366f1" />}
             label="Weekly"
-            value={`${mockStats.weeklyCompleted}/${mockStats.weeklyGoal}`}
+            value={`${stats?.weeklyCompleted ?? 0}/${stats?.weeklyGoal ?? 0}`}
           />
         </View>
 
         {/* Weekly Progress */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
           <View style={styles.progressHeader}>
-            <Text style={styles.progressTitle}>Weekly Progress</Text>
-            <Text style={styles.mutedText}>{Math.round(weeklyProgress)}%</Text>
+            <Text style={[styles.progressTitle, { color: theme.text }]}>
+              Weekly Progress
+            </Text>
+            <Text style={[styles.mutedText, { color: theme.subText }]}>
+              {Math.round(weeklyProgress)}%
+            </Text>
           </View>
-          <View style={styles.progressTrack}>
+          <View
+            style={[styles.progressTrack, { backgroundColor: theme.iconBg }]}
+          >
             <View
               style={[styles.progressFill, { width: `${weeklyProgress}%` }]}
             />
@@ -302,18 +425,20 @@ export default function HomeScreen() {
         </View>
 
         {/* Active Categories */}
-        <Text style={styles.sectionLabel}>Active Categories</Text>
+        <Text style={[styles.sectionLabel, { color: theme.subText }]}>
+          Active Categories
+        </Text>
         <View style={styles.badgeRow}>
-          {settings.enabledCategories.includes("eye") && (
+          {settings?.enabledCategories?.includes("eye") && (
             <Badge icon={<Zap size={14} color="#6366f1" />} label="Eye Care" />
           )}
-          {settings.enabledCategories.includes("stretch") && (
+          {settings?.enabledCategories?.includes("stretch") && (
             <Badge
               icon={<Zap size={14} color="#6366f1" />}
               label="Stretching"
             />
           )}
-          {settings.enabledCategories.includes("breathing") && (
+          {settings?.enabledCategories?.includes("breathing") && (
             <Badge icon={<Zap size={14} color="#6366f1" />} label="Breathing" />
           )}
         </View>
@@ -329,14 +454,14 @@ export default function HomeScreen() {
       )}
 
       {/* Exercise Modal */}
-      {showExercise && (
+      {showExercise && selectedExercise && (
         <DraggableModal
           visible={showExercise}
           onclose={() => setShowExercise(false)}
         >
           <ExerciseModal
             exercise={selectedExercise}
-            onComplete={() => setShowExercise(false)}
+            onComplete={handleExerciseComplete}
             onClose={() => setShowExercise(false)}
           />
         </DraggableModal>

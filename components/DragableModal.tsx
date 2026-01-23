@@ -7,8 +7,10 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useTheme } from "./ThemeContext";
 
 export function DraggableModal({ visible, onClose, children }: any) {
+  const { theme } = useTheme();
   const screenHeight = Dimensions.get("window").height;
   const translateY = useRef(new Animated.Value(screenHeight)).current;
 
@@ -54,7 +56,11 @@ export function DraggableModal({ visible, onClose, children }: any) {
     <Modal visible={visible} transparent animationType="none">
       <View style={styles.backdrop}>
         <Animated.View
-          style={[styles.container, { transform: [{ translateY }] }]}
+          style={[
+            styles.container,
+            { backgroundColor: theme.background },
+            { transform: [{ translateY }] },
+          ]}
           {...panResponder.panHandlers}
         >
           {children}

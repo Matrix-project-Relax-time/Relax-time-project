@@ -13,10 +13,11 @@ import {
   Wind,
   X,
 } from "lucide-react-native";
+import { useTheme } from "./ThemeContext";
 
 interface ExerciseStep {
   text: string;
-  image: string;
+  image?: string;
 }
 
 interface Exercise {
@@ -25,7 +26,7 @@ interface Exercise {
   category: "eye" | "stretch" | "breathing";
   duration: number;
   description: string;
-  image: string;
+  image?: string;
   steps: ExerciseStep[];
 }
 
@@ -52,6 +53,7 @@ export function ExerciseModal({
   onComplete,
   onClose,
 }: ExerciseModalProps) {
+  const { theme } = useTheme();
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(exercise.duration);
   const [currentStep, setCurrentStep] = useState(0);
@@ -88,7 +90,7 @@ export function ExerciseModal({
     const elapsed = exercise.duration - timeLeft;
     const step = Math.min(
       Math.floor(elapsed / stepDuration),
-      exercise.steps.length - 1
+      exercise.steps.length - 1,
     );
 
     setCurrentStep(step);
@@ -114,15 +116,17 @@ export function ExerciseModal({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <View style={styles.header}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { borderBottomColor: theme.card }]}>
           <Pressable onPress={onClose} hitSlop={16} style={styles.iconButton}>
-            <X size={24} color="#000" />
+            <X size={24} color={theme.text} />
           </Pressable>
 
           <View style={styles.category}>
             <Icon size={16} color={config.color} />
-            <Text style={styles.categoryText}>{config.label}</Text>
+            <Text style={[styles.categoryText, { color: theme.text }]}>
+              {config.label}
+            </Text>
           </View>
 
           <View style={{ width: 36 }} />
@@ -130,7 +134,7 @@ export function ExerciseModal({
 
         <View>
           {/* Image */}
-          <View style={styles.imageWrapper}>
+          <View style={[styles.imageWrapper, { backgroundColor: theme.card }]}>
             <Image
               source={{
                 uri: exercise.steps[currentStep]?.image || exercise.image,
@@ -143,7 +147,10 @@ export function ExerciseModal({
               <Pressable
                 onPress={() => goToStep(currentStep - 1)}
                 disabled={currentStep === 0}
-                style={styles.overlayButton}
+                style={[
+                  styles.overlayButton,
+                  { backgroundColor: theme.breath, justifyContent: "center" },
+                ]}
               >
                 <ChevronLeft size={20} />
               </Pressable>
@@ -160,7 +167,10 @@ export function ExerciseModal({
               <Pressable
                 onPress={() => goToStep(currentStep + 1)}
                 disabled={currentStep === exercise.steps.length - 1}
-                style={styles.overlayButton}
+                style={[
+                  styles.overlayButton,
+                  { backgroundColor: theme.breath, justifyContent: "center" },
+                ]}
               >
                 <ChevronRight size={20} />
               </Pressable>
@@ -169,19 +179,25 @@ export function ExerciseModal({
 
           {/* Info */}
           <View style={styles.content}>
-            <Text style={styles.title}>{exercise.name}</Text>
-            <Text style={styles.description}>{exercise.description}</Text>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {exercise.name}
+            </Text>
+            <Text style={[styles.description, { color: theme.subText }]}>
+              {exercise.description}
+            </Text>
 
             {/* Step card */}
-            <View style={styles.stepCard}>
-              <Text style={styles.stepText}>
+            <View style={[styles.stepCard, { backgroundColor: theme.card }]}>
+              <Text style={[styles.stepText, { color: theme.text }]}>
                 {exercise.steps[currentStep]?.text}
               </Text>
             </View>
 
             {/* Timer */}
             <View style={styles.timer}>
-              <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+              <Text style={[styles.timerText, { color: theme.text }]}>
+                {formatTime(timeLeft)}
+              </Text>
               <View style={styles.progressTrack}>
                 <View
                   style={[styles.progressFill, { width: `${progress}%` }]}
@@ -192,26 +208,37 @@ export function ExerciseModal({
         </View>
 
         {/* Bottom controls */}
-        <View style={styles.footer}>
-          <View style={styles.controls}>
-            <Pressable onPress={reset} style={styles.circleBtn}>
-              <RotateCcw size={20} />
+        <View style={[styles.footer, { borderTopColor: theme.card }]}>
+          <View style={[styles.controls]}>
+            <Pressable
+              onPress={reset}
+              style={[styles.circleBtn, { borderColor: theme.card }]}
+            >
+              <RotateCcw color={theme.text} size={20} />
             </Pressable>
 
             <Pressable
               onPress={() => setIsRunning(!isRunning)}
-              style={[styles.circleBtn, styles.playBtn]}
+              style={[
+                styles.circleBtn,
+                styles.playBtn,
+                { borderColor: theme.card },
+              ]}
             >
-              {isRunning ? <Pause size={24} /> : <Play size={24} />}
+              {isRunning ? (
+                <Pause style={[{ borderColor: "transparent" }]} size={24} />
+              ) : (
+                <Play size={24} />
+              )}
             </Pressable>
           </View>
 
           <View style={styles.actions}>
             <Pressable
-              style={styles.outlineBtn}
+              style={[styles.outlineBtn, { borderColor: theme.card }]}
               onPress={() => onComplete(false)}
             >
-              <Text>Skip</Text>
+              <Text style={{ color: theme.text }}>Skip</Text>
             </Pressable>
 
             <Pressable

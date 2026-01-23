@@ -9,7 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { mockExercises } from "../../lib/mock-data";
+
+import { Exercise, useData } from "../../components/DataContext";
+import LoadingScreen from "../../components/loading-screen";
+import { useTheme } from "../../components/ThemeContext";
 
 type Category = "all" | "eye" | "stretch" | "breathing";
 
@@ -32,7 +35,7 @@ const TABS: { value: Category; label: string; icon: JSX.Element }[] = [
   {
     value: "breathing",
     label: "Breath",
-    icon: <Feather name="wind" size={16} color="#000000" />,
+    icon: <Feather name="wind" size={16} color="#326cc9" />,
   },
 ];
 
@@ -64,27 +67,40 @@ function formatDuration(seconds: number): string {
 }
 
 export default function ExercisesScreen() {
+  const { theme } = useTheme();
+  const { exercises, isLoading } = useData();
   const [activeTab, setActiveTab] = useState<Category>("all");
-  const [selectedExercise, setSelectedExercise] = useState<
-    (typeof mockExercises)[0] | null
-  >(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null,
+  );
+
+  if (isLoading) {
+    return <LoadingScreen message="Loading exercises..." />;
+  }
 
   const filteredExercises =
     activeTab === "all"
-      ? mockExercises
-      : mockExercises.filter((e) => e.category === activeTab);
+      ? exercises
+      : exercises.filter((e) => e.category === activeTab);
 
   const getRandomExercise = (category: "eye" | "stretch" | "breathing") => {
-    const exercises = mockExercises.filter((e) => e.category === category);
-    return exercises[Math.floor(Math.random() * exercises.length)];
+    const categoryExercises = exercises.filter((e) => e.category === category);
+    return (
+      categoryExercises[Math.floor(Math.random() * categoryExercises.length)] ||
+      null
+    );
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Exercises</Text>
-        <Text style={styles.subtitle}>Browse and start exercises</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Exercises</Text>
+        <Text style={[styles.subtitle, { color: theme.subText }]}>
+          Browse and start exercises
+        </Text>
       </View>
 
       {/* Category Tabs */}
@@ -97,20 +113,28 @@ export default function ExercisesScreen() {
           const isActive = activeTab === tab.value;
           const count =
             tab.value === "all"
-              ? mockExercises.length
-              : mockExercises.filter((e) => e.category === tab.value).length;
+              ? exercises.length
+              : exercises.filter((e) => e.category === tab.value).length;
           return (
             <TouchableOpacity
               key={tab.value}
               onPress={() => setActiveTab(tab.value)}
-              style={[styles.tabButton, isActive && styles.tabButtonActive]}
+              style={[
+                styles.tabButton,
+                { backgroundColor: theme.card },
+                isActive && styles.tabButtonActive,
+              ]}
             >
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
               >
                 {tab.icon}
                 <Text
-                  style={[styles.tabText, isActive && { color: "#FFFFFF" }]}
+                  style={[
+                    styles.tabText,
+                    { color: theme.text },
+                    isActive && { color: "#FFFFFF" },
+                  ]}
                 >
                   {tab.label}
                 </Text>
@@ -119,7 +143,7 @@ export default function ExercisesScreen() {
                     styles.tabCount,
                     isActive
                       ? { color: "rgba(255,255,255,0.7)" }
-                      : { color: "#6B7280" },
+                      : { color: theme.subText },
                   ]}
                 >
                   {count}
@@ -133,18 +157,20 @@ export default function ExercisesScreen() {
       {/* Exercise List */}
       <View style={{ marginVertical: 12 }}>
         {filteredExercises.map((exercise) => {
-          const config = categoryConfig[exercise.category];
+          const config =
+            categoryConfig[
+              exercise.category as "eye" | "stretch" | "breathing"
+            ];
           return (
             <TouchableOpacity
               key={exercise.id}
-              style={styles.card}
+              style={[styles.card, { backgroundColor: theme.card }]}
               onPress={() => setSelectedExercise(exercise)}
             >
               <Image
                 source={exercise.image ? { uri: exercise.image } : undefined}
-                style={styles.thumbnail}
+                style={[styles.thumbnail, { backgroundColor: theme.iconBg }]}
               />
-
               <View style={styles.cardContent}>
                 <View>
                   <View
@@ -156,17 +182,22 @@ export default function ExercisesScreen() {
                     }}
                   >
                     {config.icon}
-                    <Text style={{ fontSize: 10, color: "#6B7280" }}>
+                    <Text style={{ fontSize: 10, color: theme.subText }}>
                       {config.label}
                     </Text>
                   </View>
                   <Text
-                    style={{ fontWeight: "600", fontSize: 14, marginBottom: 2 }}
+                    style={{
+                      fontWeight: "600",
+                      fontSize: 14,
+                      marginBottom: 2,
+                      color: theme.text,
+                    }}
                   >
                     {exercise.name}
                   </Text>
                   <Text
-                    style={{ fontSize: 12, color: "#6B7280" }}
+                    style={{ fontSize: 12, color: theme.subText }}
                     numberOfLines={1}
                   >
                     {exercise.description}
@@ -193,11 +224,11 @@ export default function ExercisesScreen() {
                         size={12}
                         color="#6B7280"
                       />
-                      <Text style={{ fontSize: 10, color: "#6B7280" }}>
+                      <Text style={{ fontSize: 10, color: theme.subText }}>
                         {formatDuration(exercise.duration)}
                       </Text>
                     </View>
-                    <Text style={{ fontSize: 10, color: "#6B7280" }}>
+                    <Text style={{ fontSize: 10, color: theme.subText }}>
                       {exercise.steps.length} steps
                     </Text>
                   </View>
@@ -225,18 +256,28 @@ export default function ExercisesScreen() {
 
       {/* Quick Start */}
       <View>
-        <Text style={styles.quickTitle}>Quick Start</Text>
+        <Text style={[styles.quickTitle, { color: theme.subText }]}>
+          Quick Start
+        </Text>
         <View style={styles.quickGrid}>
           {(["eye", "stretch", "breathing"] as const).map((category) => {
             const config = categoryConfig[category];
+            const exercise = getRandomExercise(category);
             return (
               <TouchableOpacity
                 key={category}
                 style={[styles.quickButton, { backgroundColor: config.bg }]}
-                onPress={() => setSelectedExercise(getRandomExercise(category))}
+                onPress={() => exercise && setSelectedExercise(exercise)}
               >
                 {config.icon}
-                <Text style={{ fontSize: 10, fontWeight: "500", marginTop: 4 }}>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "500",
+                    marginTop: 4,
+                    color: "#000",
+                  }}
+                >
                   {config.label}
                 </Text>
               </TouchableOpacity>
@@ -248,11 +289,18 @@ export default function ExercisesScreen() {
       {/* Exercise Modal */}
       <Modal visible={!!selectedExercise} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={{ fontWeight: "bold", fontSize: 16, marginBottom: 8 }}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 16,
+                marginBottom: 8,
+                color: theme.text,
+              }}
+            >
               {selectedExercise?.name}
             </Text>
-            <Text style={{ fontSize: 12, color: "#6B7280" }}>
+            <Text style={{ fontSize: 12, color: theme.subText }}>
               {selectedExercise?.description}
             </Text>
             <TouchableOpacity
@@ -269,12 +317,7 @@ export default function ExercisesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#F9FAFB",
-    paddingTop: 50,
-  },
+  container: { flex: 1, padding: 16, paddingTop: 50 },
   header: { marginBottom: 16 },
   title: { fontSize: 24, fontWeight: "bold" },
   subtitle: { fontSize: 14, color: "#6B7280" },
@@ -283,20 +326,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: "#E5E7EB",
     marginRight: 8,
   },
   tabButtonActive: { backgroundColor: "#4F46E5" },
-  tabText: { fontSize: 12, color: "#374151" },
+  tabText: { fontSize: 12 },
   tabCount: { fontSize: 10 },
   card: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     marginBottom: 12,
     overflow: "hidden",
   },
-  thumbnail: { width: 96, height: 96, backgroundColor: "#E5E7EB" },
+  thumbnail: { width: 96, height: 96 },
   cardContent: { flex: 1, padding: 8, justifyContent: "space-between" },
   startButton: {
     flexDirection: "row",
@@ -306,12 +347,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
-  quickTitle: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#6B7280",
-    marginBottom: 6,
-  },
+  quickTitle: { fontSize: 12, fontWeight: "500", marginBottom: 6 },
   quickGrid: { flexDirection: "row", justifyContent: "space-between" },
   quickButton: {
     flex: 1,
@@ -326,12 +362,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContent: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-    width: "80%",
-  },
+  modalContent: { borderRadius: 12, padding: 16, width: "80%" },
   modalClose: {
     marginTop: 16,
     backgroundColor: "#4F46E5",
