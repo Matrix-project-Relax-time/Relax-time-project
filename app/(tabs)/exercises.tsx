@@ -20,7 +20,7 @@ const TABS: { value: Category; label: string; icon: JSX.Element }[] = [
   {
     value: "all",
     label: "All",
-    icon: <MaterialIcons name="auto-awesome" size={16} color="#8498d1" />,
+    icon: <MaterialIcons name="auto-awesome" size={16} color="#ff21f0" />,
   },
   {
     value: "eye",
@@ -56,7 +56,7 @@ const categoryConfig = {
     label: "Breathing",
     color: "#97dbca",
     bg: "#EDE9FE",
-    icon: <Feather name="wind" size={20} color="#000000" />,
+    icon: <Feather name="wind" size={20} color="#326cc9" />,
   },
 };
 
@@ -266,7 +266,7 @@ export default function ExercisesScreen() {
             return (
               <TouchableOpacity
                 key={category}
-                style={[styles.quickButton, { backgroundColor: config.bg }]}
+                style={[styles.quickButton, { backgroundColor: theme.card }]}
                 onPress={() => exercise && setSelectedExercise(exercise)}
               >
                 {config.icon}
@@ -275,7 +275,7 @@ export default function ExercisesScreen() {
                     fontSize: 10,
                     fontWeight: "500",
                     marginTop: 4,
-                    color: "#000",
+                    color: theme.text,
                   }}
                 >
                   {config.label}
@@ -317,7 +317,7 @@ export default function ExercisesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 50 },
+  container: { flex: 1, padding: 16, paddingTop: 50, marginBottom: 10 },
   header: { marginBottom: 16 },
   title: { fontSize: 24, fontWeight: "bold" },
   subtitle: { fontSize: 14, color: "#6B7280" },

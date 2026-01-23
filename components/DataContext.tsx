@@ -137,6 +137,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addHistoryItem = (item: HistoryItem) => {
     setHistory((prev) => [item, ...prev]);
+
+    setStats((prev) => {
+      if (!prev) return null;
+      const isCompleted = item.status === "completed";
+      return {
+        ...prev,
+        todayCompleted: isCompleted
+          ? prev.todayCompleted + 1
+          : prev.todayCompleted,
+        todaySkipped: !isCompleted ? prev.todaySkipped + 1 : prev.todaySkipped,
+        weeklyCompleted: isCompleted
+          ? prev.weeklyCompleted + 1
+          : prev.weeklyCompleted,
+      };
+    });
   };
 
   return (
