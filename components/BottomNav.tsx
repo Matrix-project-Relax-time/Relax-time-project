@@ -3,6 +3,7 @@ import { Bell, Clock, Dumbbell, Home, Settings } from "lucide-react-native";
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "./ThemeContext";
 
 const tabs = [
   { href: "/home", label: "Home", icon: Home },
@@ -35,7 +36,7 @@ const TabButton = memo(
         </Text>
       </Pressable>
     );
-  }
+  },
 );
 
 TabButton.displayName = "TabButton";
@@ -44,10 +45,18 @@ export const BottomNav = memo(function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
   return (
     <View
-      style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}
+      style={[
+        styles.container,
+        {
+          paddingBottom: Math.max(insets.bottom, 8),
+          backgroundColor: theme.background,
+          borderTopColor: theme.card,
+        },
+      ]}
     >
       {tabs.map((tab) => (
         <TabButton

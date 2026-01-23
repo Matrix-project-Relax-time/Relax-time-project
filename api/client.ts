@@ -1,5 +1,5 @@
 // api/client.ts
-const API_URL = "http://172.20.10.2:3000"; // your computer IP
+const API_URL = "http://172.20.10.2:5000"; // your computer IP
 
 export async function healthCheck() {
   try {

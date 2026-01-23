@@ -1,5 +1,5 @@
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"; // Using Expo icons
-import React, { JSX, useState } from "react";
+import { JSX, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { mockHistory } from "../../lib/mock-data";
 
-// Mock data (replace with your real data or API)
+import { HistoryItem, useData } from "../../components/DataContext";
+import LoadingScreen from "../../components/loading-screen";
+import { useTheme } from "../../components/ThemeContext";
 
 type FilterPeriod = "today" | "week" | "all";
 
@@ -20,17 +21,35 @@ const CATEGORY_ICONS: Record<string, JSX.Element> = {
 };
 
 export default function HistoryScreen() {
+  const { theme } = useTheme();
+  const { history, isLoading } = useData();
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>("week");
 
-  const filteredHistory =
-    filterPeriod === "today"
-      ? mockHistory.slice(0, 3)
-      : filterPeriod === "week"
-      ? mockHistory.slice(0, 6)
-      : mockHistory;
+  if (isLoading) {
+    return <LoadingScreen message="Loading history..." />;
+  }
+
+  const filteredHistory = history.filter((item) => {
+    const date = new Date(item.completedAt);
+    const now = new Date();
+
+    if (filterPeriod === "today") {
+      return (
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+      );
+    }
+    if (filterPeriod === "week") {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return date >= oneWeekAgo;
+    }
+    return true;
+  });
 
   const completed = filteredHistory.filter(
-    (e) => e.status === "completed"
+    (e) => e.status === "completed",
   ).length;
   const skipped = filteredHistory.filter((e) => e.status === "skipped").length;
   const completionRate =
@@ -39,8 +58,8 @@ export default function HistoryScreen() {
       : 0;
 
   // Group by date
-  const groupedHistory: Record<string, typeof mockHistory> = {};
-  filteredHistory.forEach((entry: { completedAt: string | number | Date }) => {
+  const groupedHistory: Record<string, HistoryItem[]> = {};
+  filteredHistory.forEach((entry) => {
     const date = new Date(entry.completedAt);
     const key = date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -48,15 +67,22 @@ export default function HistoryScreen() {
       day: "numeric",
     });
     if (!groupedHistory[key]) groupedHistory[key] = [];
-    groupedHistory[key].push();
+    groupedHistory[key].push(entry);
   });
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: theme.background },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>History</Text>
-        <Text style={styles.subtitle}>Track your wellness journey</Text>
+        <Text style={[styles.title, { color: theme.text }]}>History</Text>
+        <Text style={[styles.subtitle, { color: theme.subText }]}>
+          Track your wellness journey
+        </Text>
       </View>
 
       {/* Filter Buttons */}
@@ -68,19 +94,23 @@ export default function HistoryScreen() {
             style={[
               styles.filterButton,
               filterPeriod === period && styles.filterButtonActive,
+              {
+                backgroundColor:
+                  filterPeriod === period ? theme.primary : theme.card,
+              },
             ]}
           >
             <Text
               style={[
                 styles.filterText,
-                filterPeriod === period && styles.filterTextActive,
+                { color: filterPeriod === period ? "#fff" : theme.text },
               ]}
             >
               {period === "today"
                 ? "Today"
                 : period === "week"
-                ? "This Week"
-                : "All Time"}
+                  ? "This Week"
+                  : "All Time"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -88,127 +118,105 @@ export default function HistoryScreen() {
 
       {/* Stats */}
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
+        <View style={[styles.statCard, { backgroundColor: theme.card }]}>
           <Feather name="check-circle" size={20} color="#4F46E5" />
-          <Text style={styles.statNumber}>{completed}</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {completed}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.subText }]}>
+            Completed
+          </Text>
         </View>
-        <View style={styles.statCard}>
+        <View style={[styles.statCard, { backgroundColor: theme.card }]}>
           <Feather name="trending-up" size={20} color="#10B981" />
-          <Text style={styles.statNumber}>{completionRate}%</Text>
-          <Text style={styles.statLabel}>Rate</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {completionRate}%
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.subText }]}>Rate</Text>
         </View>
-        <View style={styles.statCard}>
+        <View style={[styles.statCard, { backgroundColor: theme.card }]}>
           <Feather name="x-circle" size={20} color="#6B7280" />
-          <Text style={styles.statNumber}>{skipped}</Text>
-          <Text style={styles.statLabel}>Skipped</Text>
+          <Text style={[styles.statNumber, { color: theme.text }]}>
+            {skipped}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.subText }]}>
+            Skipped
+          </Text>
         </View>
       </View>
 
       {/* History List */}
       {Object.keys(groupedHistory).length === 0 ? (
-        <View style={styles.emptyCard}>
+        <View style={[styles.emptyCard, { backgroundColor: theme.card }]}>
           <Feather name="calendar" size={40} color="#6B7280" />
-          <Text style={styles.emptyTitle}>No history yet</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: theme.text }]}>
+            No history yet
+          </Text>
+          <Text style={[styles.emptySubtitle, { color: theme.subText }]}>
             Complete exercises to track progress
           </Text>
         </View>
       ) : (
         Object.entries(groupedHistory).map(([date, entries]) => (
           <View key={date} style={{ marginBottom: 20 }}>
-            <Text style={styles.groupDate}>{date}</Text>
-            {entries.map(
-              (entry: {
-                status: string;
-                category: string | number;
-                completedAt: string | number | Date;
-                id: React.Key | null | undefined;
-                exerciseName:
-                  | string
-                  | number
-                  | bigint
-                  | boolean
-                  | React.ReactElement<
-                      unknown,
-                      string | React.JSXElementConstructor<any>
-                    >
-                  | Iterable<React.ReactNode>
-                  | React.ReactPortal
-                  | Promise<
-                      | string
-                      | number
-                      | bigint
-                      | boolean
-                      | React.ReactPortal
-                      | React.ReactElement<
-                          unknown,
-                          string | React.JSXElementConstructor<any>
-                        >
-                      | Iterable<React.ReactNode>
-                      | null
-                      | undefined
-                    >
-                  | null
-                  | undefined;
-              }) => {
-                const isCompleted = entry.status === "completed";
-                const Icon = CATEGORY_ICONS[entry.category] || (
-                  <Feather name="circle" size={20} color="#6B7280" />
-                );
-                const time = new Date(entry.completedAt).toLocaleTimeString(
-                  [],
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                );
+            <Text style={[styles.groupDate, { color: theme.subText }]}>
+              {date}
+            </Text>
+            {entries.map((entry) => {
+              const isCompleted = entry.status === "completed";
+              const Icon = CATEGORY_ICONS[entry.category] || (
+                <Feather name="circle" size={20} color="#6B7280" />
+              );
+              const time = new Date(entry.completedAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
 
-                return (
+              return (
+                <View
+                  key={entry.id}
+                  style={[
+                    styles.historyCard,
+                    !isCompleted && { opacity: 0.5 },
+                    { backgroundColor: theme.card },
+                  ]}
+                >
                   <View
-                    key={entry.id}
                     style={[
-                      styles.historyCard,
-                      !isCompleted && { opacity: 0.5 },
+                      styles.iconWrapper,
+                      isCompleted
+                        ? { backgroundColor: theme.primary + "20" }
+                        : { backgroundColor: theme.iconBg },
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.iconWrapper,
-                        isCompleted
-                          ? { backgroundColor: "#E0E7FF" }
-                          : { backgroundColor: "#F3F4F6" },
-                      ]}
-                    >
-                      {Icon}
-                    </View>
-                    <View style={styles.historyInfo}>
-                      <Text style={styles.exerciseName}>
-                        {entry.exerciseName}
-                      </Text>
-                      <Text style={styles.exerciseTime}>{time}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        isCompleted
-                          ? { backgroundColor: "#E0E7FF" }
-                          : { backgroundColor: "#F3F4F6" },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusText,
-                          isCompleted && { color: "#4F46E5" },
-                        ]}
-                      >
-                        {isCompleted ? "Done" : "Skipped"}
-                      </Text>
-                    </View>
+                    {Icon}
                   </View>
-                );
-              }
-            )}
+                  <View style={styles.historyInfo}>
+                    <Text style={[styles.exerciseName, { color: theme.text }]}>
+                      {entry.exerciseName}
+                    </Text>
+                    <Text style={styles.exerciseTime}>{time}</Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      isCompleted
+                        ? { backgroundColor: theme.primary + "20" }
+                        : { backgroundColor: theme.iconBg },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.statusText,
+                        isCompleted && { color: "#4F46E5" },
+                      ]}
+                    >
+                      {isCompleted ? "Done" : "Skipped"}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         ))
       )}
