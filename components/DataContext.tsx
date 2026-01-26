@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
   useCallback,
@@ -33,6 +34,7 @@ export interface Settings {
   soundEnabled: boolean;
   notificationsEnabled: boolean;
   theme: "light" | "dark";
+  
 }
 
 export interface Stats {
@@ -61,7 +63,10 @@ interface DataContextType {
   isLoading: boolean;
   refreshData: () => Promise<void>;
   addHistoryItem: (item: HistoryItem) => void;
+  // ✅ allow partial updates
+  updateSettings: (settings: Partial<Settings>) => void;
 }
+
 
 // --- Context ---
 const DataContext = createContext<DataContextType>({
@@ -72,9 +77,10 @@ const DataContext = createContext<DataContextType>({
   isLoading: true,
   refreshData: async () => {},
   addHistoryItem: () => {},
+  updateSettings: () => {},
 });
 
-const API_URL = "http://172.20.10.2:5000";
+const API_URL = "http://172.20.10.3:5000";
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -85,8 +91,35 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+
+const updateSettings = (newSettings: Partial<Settings>) => {
+  setSettings((prev) => {
+    const updated: Settings = {
+      workStartTime: prev?.workStartTime ?? "09:00",
+      workEndTime: prev?.workEndTime ?? "17:00",
+      workDays: prev?.workDays ?? [1, 2, 3, 4, 5],
+      reminderInterval: prev?.reminderInterval ?? 60,
+      enabledCategories: prev?.enabledCategories ?? ["eye", "stretch"],
+      soundEnabled: prev?.soundEnabled ?? true,
+      notificationsEnabled: prev?.notificationsEnabled ?? true,
+      theme: prev?.theme ?? "light",
+      
+      ...newSettings,
+    };
+    AsyncStorage.setItem("reminderSettings", JSON.stringify(updated));
+    return updated;
+  });
+};
+
+
+
   const refreshData = useCallback(async () => {
     try {
+      const stored = await AsyncStorage.getItem("reminderSettings");
+      const localSettings = stored
+        ? (JSON.parse(stored) as Partial<Settings>)
+        : null;
+
       const [exercisesRes, historyRes, settingsRes, statsRes] =
         await Promise.all([
           fetch(`${API_URL}/api/exercises`).catch(() => null),
@@ -107,14 +140,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (settingsRes?.ok) {
         const data = (await settingsRes.json()) as Partial<Settings>;
+
         setSettings({
-          workStartTime: data.workStartTime ?? "09:00",
-          workEndTime: data.workEndTime ?? "17:00",
-          workDays: data.workDays ?? [1, 2, 3, 4, 5],
-          reminderInterval: data.reminderInterval ?? 60,
-          enabledCategories: data.enabledCategories ?? ["eye", "stretch"],
-          soundEnabled: data.soundEnabled ?? true,
-          notificationsEnabled: data.notificationsEnabled ?? true,
+          workStartTime:
+            localSettings?.workStartTime ??
+            data.workStartTime ??
+            "09:00",
+          workEndTime:
+            localSettings?.workEndTime ??
+            data.workEndTime ??
+            "17:00",
+          workDays:
+            localSettings?.workDays ??
+            data.workDays ??
+            [1, 2, 3, 4, 5],
+          reminderInterval:
+            localSettings?.reminderInterval ??
+            data.reminderInterval ??
+            60,
+          enabledCategories:
+            localSettings?.enabledCategories ??
+            data.enabledCategories ??
+            ["eye", "stretch"],
+          soundEnabled:
+            localSettings?.soundEnabled ??
+            data.soundEnabled ??
+            true,
+          notificationsEnabled:
+            data.notificationsEnabled ?? true,
           theme: data.theme ?? "light",
         });
       }
@@ -130,7 +183,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Fetch on mount
   useEffect(() => {
     refreshData();
   }, [refreshData]);
@@ -140,14 +192,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setStats((prev) => {
       if (!prev) return null;
-      const isCompleted = item.status === "completed";
+      const completed = item.status === "completed";
       return {
         ...prev,
-        todayCompleted: isCompleted
+        todayCompleted: completed
           ? prev.todayCompleted + 1
           : prev.todayCompleted,
-        todaySkipped: !isCompleted ? prev.todaySkipped + 1 : prev.todaySkipped,
-        weeklyCompleted: isCompleted
+        todaySkipped: !completed
+          ? prev.todaySkipped + 1
+          : prev.todaySkipped,
+        weeklyCompleted: completed
           ? prev.weeklyCompleted + 1
           : prev.weeklyCompleted,
       };
@@ -164,6 +218,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         isLoading,
         refreshData,
         addHistoryItem,
+        updateSettings,
       }}
     >
       {children}

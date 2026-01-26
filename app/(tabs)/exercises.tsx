@@ -166,11 +166,14 @@ export default function ExercisesScreen() {
               key={exercise.id}
               style={[styles.card, { backgroundColor: theme.card }]}
               onPress={() => setSelectedExercise(exercise)}
-            >
-              <Image
+            >{}
+              <Image 
                 source={exercise.image ? { uri: exercise.image } : undefined}
                 style={[styles.thumbnail, { backgroundColor: theme.iconBg }]}
               />
+          
+  
+
               <View style={styles.cardContent}>
                 <View>
                   <View

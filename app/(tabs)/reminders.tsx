@@ -65,28 +65,33 @@ export default function RemindersScreen() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings from API and AsyncStorage
-  useEffect(() => {
-    const loadSettings = async () => {
-      // Load master toggle
-      const enabledVal = await AsyncStorage.getItem("remindersEnabled");
-      if (enabledVal !== null) setRemindersEnabled(enabledVal === "true");
+useEffect(() => {
+  const loadSettings = async () => {
+    // master toggle
+    const enabledVal = await AsyncStorage.getItem("remindersEnabled");
+    if (enabledVal !== null) {
+      setRemindersEnabled(enabledVal === "true");
+    }
 
-      if (settings) {
-        setStartTime(settings.workStartTime);
-        setEndTime(settings.workEndTime);
-        setWorkDays(settings.workDays);
-        setInterval(settings.reminderInterval);
-        setCategories(settings.enabledCategories);
-        setSoundEnabled(settings.soundEnabled);
-      }
+    const stored = await AsyncStorage.getItem("reminderSettings");
+    if (stored) {
+      const parsed = JSON.parse(stored);
 
-      setIsLoaded(true);
-    };
+      setStartTime(parsed.workStartTime ?? "09:00");
+      setEndTime(parsed.workEndTime ?? "17:00");
+      setWorkDays(parsed.workDays ?? [1, 2, 3, 4, 5]);
+      setInterval(parsed.reminderInterval ?? 60);
+      setCategories(parsed.enabledCategories ?? ["eye", "stretch"]);
+      setSoundEnabled(parsed.soundEnabled ?? true);
+    }
 
-    loadSettings();
-  }, [settings]);
+    setIsLoaded(true);
+  };
 
-  // Save settings locally whenever they change
+  loadSettings();
+}, []);
+
+
   useEffect(() => {
     if (!isLoaded) return;
 
