@@ -54,7 +54,7 @@ const CATEGORIES = [
 export default function RemindersScreen() {
   const { remindersEnabled, setRemindersEnabled } = useContext(ReminderContext);
   const { theme } = useTheme();
-  const { settings } = useData();
+  const { settings, updateSettings } = useData();
 
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
@@ -65,37 +65,36 @@ export default function RemindersScreen() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings from API and AsyncStorage
-useEffect(() => {
-  const loadSettings = async () => {
-    // master toggle
-    const enabledVal = await AsyncStorage.getItem("remindersEnabled");
-    if (enabledVal !== null) {
-      setRemindersEnabled(enabledVal === "true");
-    }
+  useEffect(() => {
+    const loadSettings = async () => {
+      // master toggle
+      const enabledVal = await AsyncStorage.getItem("remindersEnabled");
+      if (enabledVal !== null) {
+        setRemindersEnabled(enabledVal === "true");
+      }
 
-    const stored = await AsyncStorage.getItem("reminderSettings");
-    if (stored) {
-      const parsed = JSON.parse(stored);
+      const stored = await AsyncStorage.getItem("reminderSettings");
+      if (stored) {
+        const parsed = JSON.parse(stored);
 
-      setStartTime(parsed.workStartTime ?? "09:00");
-      setEndTime(parsed.workEndTime ?? "17:00");
-      setWorkDays(parsed.workDays ?? [1, 2, 3, 4, 5]);
-      setInterval(parsed.reminderInterval ?? 60);
-      setCategories(parsed.enabledCategories ?? ["eye", "stretch"]);
-      setSoundEnabled(parsed.soundEnabled ?? true);
-    }
+        setStartTime(parsed.workStartTime ?? "09:00");
+        setEndTime(parsed.workEndTime ?? "17:00");
+        setWorkDays(parsed.workDays ?? [1, 2, 3, 4, 5]);
+        setInterval(parsed.reminderInterval ?? 60);
+        setCategories(parsed.enabledCategories ?? ["eye", "stretch"]);
+        setSoundEnabled(parsed.soundEnabled ?? true);
+      }
 
-    setIsLoaded(true);
-  };
+      setIsLoaded(true);
+    };
 
-  loadSettings();
-}, []);
-
+    loadSettings();
+  }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
 
-    const settings = {
+    const newSettings = {
       workStartTime: startTime,
       workEndTime: endTime,
       workDays,
@@ -104,7 +103,11 @@ useEffect(() => {
       soundEnabled,
     };
 
-    AsyncStorage.setItem("reminderSettings", JSON.stringify(settings));
+    // 1. persist
+    AsyncStorage.setItem("reminderSettings", JSON.stringify(newSettings));
+
+    // 2. 🔥 GLOBAL SYNC (хамгийн чухал)
+    updateSettings(newSettings);
   }, [
     startTime,
     endTime,

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -15,12 +16,12 @@ import {
 } from "lucide-react-native";
 import { useTheme } from "./ThemeContext";
 
-interface ExerciseStep {
+export interface ExerciseStep {
   text: string;
   image?: string;
 }
 
-interface Exercise {
+export interface Exercise {
   id: string;
   name: string;
   category: "eye" | "stretch" | "breathing";
@@ -54,17 +55,18 @@ export function ExerciseModal({
   onClose,
 }: ExerciseModalProps) {
   const { theme } = useTheme();
-  const [isRunning, setIsRunning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(exercise.duration);
-  const [currentStep, setCurrentStep] = useState(0);
 
-  const progress = ((exercise.duration - timeLeft) / exercise.duration) * 100;
+  // ---------------- State ----------------
+  const [isRunning, setIsRunning] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(() => exercise.duration);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const config = categoryConfig[exercise.category];
   const Icon = config.icon;
 
-  /* ---------------- Timer ---------------- */
+  const progress = ((exercise.duration - timeLeft) / exercise.duration) * 100;
 
+  // ---------------- Timer ----------------
   useEffect(() => {
     if (!isRunning || timeLeft <= 0) return;
 
@@ -79,23 +81,26 @@ export function ExerciseModal({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft]);
-
-  /* ---------------- Step sync ---------------- */
+  }, [isRunning]);
 
   useEffect(() => {
     if (!exercise.steps.length) return;
 
     const stepDuration = exercise.duration / exercise.steps.length;
-    const elapsed = exercise.duration - timeLeft;
-    const step = Math.min(
-      Math.floor(elapsed / stepDuration),
-      exercise.steps.length - 1,
+
+    // calculate step based on time
+    const calculatedStep = Math.floor(
+      (exercise.duration - timeLeft) / stepDuration,
     );
 
-    setCurrentStep(step);
-  }, [timeLeft, exercise]);
+    // Only auto-advance if user hasn't manually moved ahead
+    setCurrentStep((prevStep) => {
+      if (calculatedStep > prevStep) return calculatedStep;
+      return prevStep; // don't go back automatically
+    });
+  }, [timeLeft]);
 
+  // ---------------- Handlers ----------------
   const reset = () => {
     setIsRunning(false);
     setTimeLeft(exercise.duration);
@@ -108,6 +113,7 @@ export function ExerciseModal({
     }
   };
 
+  // ---------------- Render ----------------
   return (
     <Modal
       visible={true}
@@ -117,8 +123,13 @@ export function ExerciseModal({
       onRequestClose={onClose}
     >
       <View style={[styles.container, { backgroundColor: theme.background }]}>
+        {/* Header */}
         <View style={[styles.header, { borderBottomColor: theme.card }]}>
-          <Pressable onPress={onClose} hitSlop={16} style={styles.iconButton}>
+          <Pressable
+            onPress={onClose}
+            hitSlop={20}
+            style={[styles.iconButton, { marginTop: 27 }]}
+          >
             <X size={24} color={theme.text} />
           </Pressable>
 
@@ -132,6 +143,7 @@ export function ExerciseModal({
           <View style={{ width: 36 }} />
         </View>
 
+        {/* Exercise Content */}
         <View>
           {/* Image */}
           <View style={[styles.imageWrapper, { backgroundColor: theme.card }]}>
@@ -142,7 +154,7 @@ export function ExerciseModal({
               style={styles.image}
             />
 
-            {/* Step navigation */}
+            {/* Step Navigation */}
             <View style={styles.imageOverlay}>
               <Pressable
                 onPress={() => goToStep(currentStep - 1)}
@@ -186,7 +198,7 @@ export function ExerciseModal({
               {exercise.description}
             </Text>
 
-            {/* Step card */}
+            {/* Step Card */}
             <View style={[styles.stepCard, { backgroundColor: theme.card }]}>
               <Text style={[styles.stepText, { color: theme.text }]}>
                 {exercise.steps[currentStep]?.text}
@@ -207,7 +219,7 @@ export function ExerciseModal({
           </View>
         </View>
 
-        {/* Bottom controls */}
+        {/* Footer Controls */}
         <View style={[styles.footer, { borderTopColor: theme.card }]}>
           <View style={[styles.controls]}>
             <Pressable
@@ -226,14 +238,14 @@ export function ExerciseModal({
               ]}
             >
               {isRunning ? (
-                <Pause style={[{ borderColor: "transparent" }]} size={24} />
+                <Pause size={24} color="#fff" />
               ) : (
                 <Play size={24} />
               )}
             </Pressable>
           </View>
 
-          <View style={styles.actions}>
+          <View style={[styles.actions, { paddingBottom: 20 }]}>
             <Pressable
               style={[styles.outlineBtn, { borderColor: theme.card }]}
               onPress={() => onComplete(false)}
@@ -256,7 +268,6 @@ export function ExerciseModal({
 }
 
 /* ---------------- Styles ---------------- */
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
@@ -264,16 +275,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16,
+    padding: 0,
+    paddingInline: 17,
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
   },
 
   iconButton: {
-    height: 60, // bigger height
-    width: 40, // keep width or increase if needed
-    padding: 0, // remove paddingTop
-    paddingTop: 10,
+    height: 60,
+    width: 40,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -283,21 +292,10 @@ const styles = StyleSheet.create({
     marginTop: 40,
     gap: 6,
   },
+  categoryText: { fontSize: 14, fontWeight: "500" },
 
-  categoryText: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-
-  imageWrapper: {
-    aspectRatio: 1,
-    backgroundColor: "#f3f4f6",
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-  },
+  imageWrapper: { aspectRatio: 1, backgroundColor: "#f3f4f6" },
+  image: { width: "100%", height: "100%" },
 
   imageOverlay: {
     position: "absolute",
@@ -309,85 +307,34 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 12,
   },
-
   overlayButton: {
     padding: 8,
     backgroundColor: "rgba(255,255,255,0.7)",
     borderRadius: 999,
   },
 
-  stepDots: {
-    flexDirection: "row",
-    gap: 6,
-  },
+  stepDots: { flexDirection: "row", gap: 6 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#d1d5db" },
+  activeDot: { width: 20, backgroundColor: "#6366f1" },
 
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#d1d5db",
-  },
+  content: { padding: 20 },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 4 },
+  description: { color: "#6b7280", marginBottom: 16 },
 
-  activeDot: {
-    width: 20,
-    backgroundColor: "#6366f1",
-  },
+  stepCard: { padding: 16, borderRadius: 16, marginBottom: 24 },
+  stepText: { fontSize: 16, fontWeight: "500" },
 
-  content: {
-    padding: 20,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-
-  description: {
-    color: "#6b7280",
-    marginBottom: 16,
-  },
-
-  stepCard: {
-    backgroundColor: "#f9fafb",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 24,
-  },
-
-  stepText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-
-  timer: {
-    alignItems: "center",
-    gap: 12,
-  },
-
-  timerText: {
-    fontSize: 28,
-    fontWeight: "700",
-  },
-
+  timer: { alignItems: "center", gap: 12 },
+  timerText: { fontSize: 28, fontWeight: "700" },
   progressTrack: {
     height: 6,
     width: "100%",
     backgroundColor: "#e5e7eb",
     borderRadius: 999,
   },
+  progressFill: { height: "100%", backgroundColor: "#6366f1" },
 
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#6366f1",
-  },
-
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
-    padding: 6,
-  },
-
+  footer: { borderTopWidth: 1, padding: 6 },
   controls: {
     flexDirection: "row",
     justifyContent: "center",
@@ -400,46 +347,30 @@ const styles = StyleSheet.create({
     width: 55,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
     alignItems: "center",
     justifyContent: "center",
   },
+  playBtn: { backgroundColor: "#6366f1" },
 
-  playBtn: {
-    height: 55,
-    width: 55,
-    borderRadius: 32,
-    backgroundColor: "#6366f1",
-  },
-
-  actions: {
-    flexDirection: "row",
-    gap: 12,
-  },
-
+  actions: { flexDirection: "row", gap: 12 },
   outlineBtn: {
     flex: 1,
     height: 48,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
     alignItems: "center",
     justifyContent: "center",
   },
-
   primaryBtn: {
     flex: 1,
     height: 48,
     borderRadius: 14,
+
     backgroundColor: "#6366f1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
-
-  primaryText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
+  primaryText: { color: "#fff", fontWeight: "600" },
 });
